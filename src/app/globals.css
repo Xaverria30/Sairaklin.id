@@ -1,0 +1,245 @@
+/* ========================================================= */
+/* 🔘 BUTTON STYLE - Sairaklin Pastel Blue */
+/* ========================================================= */
+.btn-primary {
+  background-color: #91a8d0 !important;   /* biru pastel lembut */
+  border-color: #91a8d0 !important;
+  color: #fff !important;
+  border-radius: 50rem !important;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  transition: all 0.25s ease;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: #7e96be !important;   /* sedikit lebih gelap saat hover */
+  border-color: #7e96be !important;
+  box-shadow: 0 4px 12px rgba(145, 168, 208, 0.35) !important;
+  transform: translateY(-1px);
+}
+
+.btn-primary:active {
+  background-color: #6f87ad !important;
+  border-color: #6f87ad !important;
+  transform: translateY(0);
+}
+
+
+/* LOGIN GLOBAL */
+/* ========================================================= */
+/* 🧊 Card Login – glass effect lembut */
+/* ========================================================= */
+.card {
+  background: rgba(255, 255, 255, 0.55) !important; /* sedikit transparan */
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+  border-radius: 1.5rem !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08) !important;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  background: rgba(255, 255, 255, 0.7) !important;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.1) !important;
+  transform: translateY(-2px);
+}
+
+/* ========================================================= */
+/* 🧭 FORM STYLE FIX - SAIRAKLIN REGISTER FORM (FINAL LOCK)  */
+/* ========================================================= */
+
+/* Input utama (lebih lembut & nyatu ke background) */
+.form-control,
+.form-control.is-invalid,
+.form-control.is-valid {
+  height: 46px !important;
+  line-height: 46px !important;
+  border-radius: 50rem !important;
+  padding: 0 2.8rem !important;
+  border-width: 1.5px !important;
+  border-color: #dee2e6 !important;
+  background-color: rgba(255, 255, 255, 0.7) !important;
+  backdrop-filter: blur(4px);
+  box-shadow: none !important;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* Fokus: lembut dengan biru pastel */
+.form-control:focus {
+  border-color: #91a8d0 !important;
+  box-shadow: 0 0 0 0.15rem rgba(145, 168, 208, 0.25) !important;
+  background-color: rgba(255, 255, 255, 0.85) !important;
+}
+
+/* Icon posisi tengah */
+.position-relative svg.text-secondary {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6c757d;
+  pointer-events: none;
+  width: 18px;
+  height: 18px;
+}
+
+/* Invalid state — fix posisi icon agar sejajar */
+.form-control.is-invalid,
+.was-validated .form-control:invalid {
+  border-color: #e26d6d !important;
+  background-position: right 1.4rem center !important;
+  background-size: 1rem 1rem !important;
+  padding-right: 2.8rem !important; /* sebelumnya 3rem — kebanyakan */
+  height: 46px !important;           /* kunci tinggi */
+  line-height: 46px !important;
+}
+
+/* perbaiki posisi icon kiri saat input invalid */
+.input-group:has(.form-control.is-invalid) .input-group-text {
+  align-items: center !important;
+  top: 0 !important;
+  transform: none !important;
+}
+
+/* jaga padding kiri agar icon user tidak turun */
+.input-group .form-control.is-invalid {
+  padding-left: 2.8rem !important;
+}
+
+
+
+/* Tombol mata */
+.btn-eye {
+  position: absolute !important;
+  right: 0.65rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  background: transparent !important;
+  border: none !important;
+  color: #6c757d !important;
+  z-index: 3;
+}
+
+/* Feedback text */
+.position-relative .small.text-success,
+.position-relative .small.text-danger,
+.position-relative .small.text-info {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 4px;
+  font-size: 0.85rem;
+  line-height: 1.1;
+}
+
+/* ========================================================= */
+/* 🧩 InputGroup (Password & Konfirmasi Password) */
+/* ========================================================= */
+.input-group {
+  display: flex;
+  align-items: center;
+  border-radius: 50rem !important;
+  overflow: hidden;
+  height: 46px !important;
+}
+
+.input-group .form-control {
+  border-radius: 50rem !important;
+  border: 1.5px solid #dee2e6 !important;
+  height: 46px !important;
+  line-height: 46px !important;
+  padding: 0 2.8rem !important;
+  box-shadow: none !important;
+  background-color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* Lock icon kiri */
+.input-group-text {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  position: absolute;
+  left: 0;
+  height: 100%;
+  width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.input-group-text svg {
+  color: #6c757d;
+  width: 18px;
+  height: 18px;
+}
+
+/* Fokus dalam input group */
+.input-group .form-control:focus {
+  border-color: #91a8d0 !important;
+  box-shadow: 0 0 0 0.15rem rgba(145, 168, 208, 0.25) !important;
+  background-color: rgba(255, 255, 255, 0.85) !important;
+}
+
+/* ========================================================= */
+/* 🎨 BEAUTIFY */
+/* ========================================================= */
+.form-control.is-valid {
+  border-color: #91a8d0 !important;
+}
+
+.invalid-feedback {
+  color: #d9534f !important;
+  font-size: 0.85rem !important;
+  margin-top: 0.25rem;
+}
+
+.text-success {
+  color: #4caf50 !important;
+}
+
+.text-info {
+  color: #91a8d0 !important;
+}
+
+/* ========================================================= */
+/* 🔗 LINK STYLE (Masuk di sini / Daftar di sini / Beranda) */
+/* ========================================================= */
+a,
+a.text-primary,
+a.text-primary:hover,
+a.text-primary:focus,
+.text-primary {
+  color: #91a8d0 !important; /* biru pastel sama kayak tombol */
+  text-decoration: none !important;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: #7993c5 !important; /* sedikit lebih gelap waktu hover */
+}
+
+/* ========================================================= */
+/* 💡 ICON COLOR VARIANT (Soft Pink Pastel #ffdcdb + Blue Glow) */
+/* ========================================================= */
+.input-group-text svg,
+.position-relative svg.text-secondary {
+  color: #000 !important; /* pink pastel lembut */
+  filter: drop-shadow(0 0 4px rgba(145, 168, 208, 0.6)); /* glow biru pastel */
+  transition: 0.25s ease;
+}
+
+/* Saat input aktif → ikon sedikit lebih terang & hidup */
+.input-group:focus-within svg,
+.position-relative:focus-within svg {
+  color: #000 !important; /* pink sedikit lebih terang saat fokus */
+  filter: drop-shadow(0 0 6px rgba(145, 168, 208, 0.9));
+}
