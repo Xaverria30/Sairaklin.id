@@ -60,7 +60,7 @@ const OrderDetailPage: React.FC = () => {
           <div className="col-lg-8">
             {/* Back Button */}
             <button 
-              onClick={() => router.push('/dashboard')}
+              onClick={() => router.push('/user/user-dashboard')}
               className="btn btn-link p-0 mb-3 text-decoration-none d-flex align-items-center"
               style={{color: '#ec4899'}}
             >

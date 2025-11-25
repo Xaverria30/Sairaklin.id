@@ -1,0 +1,178 @@
+:root {
+  --pink-1: #fad6d6;
+  --pink-2: #f6d5d5;
+  --blue-1: #ccd9f0;
+  --blue-2: #93A9D1;
+  --white: #f2f9ff;
+  --muted: #464a53;
+}
+
+/* ==== ROOT LAYOUT ==== */
+.container-root {
+  display: flex;
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--pink-2), var(--blue-2));
+  font-family: 'Poppins', sans-serif;
+}
+
+/* ==== SIDEBAR ==== */
+.sidebar {
+  width: 260px;
+  background: linear-gradient(135deg, var(--white), var(--white)); /* 🔹 Sama seperti dashboard */
+  color: var(--white);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1.5rem 1rem;
+  border-top-right-radius: 20px;
+  border-bottom-right-radius: 20px;
+  box-shadow: 4px 0 10px rgba(0, 0, 0, 0.15);
+}
+
+.sidebar-top {
+  text-align: center;
+}
+
+.brand img {
+  max-width: 80%;
+  height: auto;
+  margin-bottom: 1rem;
+}
+
+.nav-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.nav-link-custom {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: var(--muted);
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  text-align: left;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.nav-link-custom:hover,
+.nav-link-custom.active {
+  background: rgba(176, 172, 172, 0.3);
+}
+
+.sidebar-bottom {
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--white);
+}
+
+.logout-btn {
+  background: rgba(24, 24, 24, 0.15);
+  border: none;
+  color: var(--white);
+  padding: 0.6rem 0.9rem;
+  border-radius: 8px;
+  width: 100%;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.logout-btn:hover {
+  background: rgba(23, 23, 23, 0.25);
+}
+
+/* ==== MAIN DASHBOARD ==== */
+.dashboard-main {
+  flex-grow: 1;
+  padding: 2.5rem 2rem;
+  overflow-y: auto;
+  background: linear-gradient(135deg, var(--pink-2), var(--blue-2)); /* 🔹 Sama */
+  min-height: 100vh;
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
+}
+
+.dashboard-main h3 {
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  color: #222121;
+}
+
+.dashboard-main p {
+  margin-bottom: 2rem;
+  color: var(--muted);
+}
+
+/* ==== CARD CUSTOM ==== */
+.card-custom {
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  background: var(--white);
+  transition: transform 0.2s ease;
+}
+
+.card-custom:hover {
+  transform: translateY(-3px);
+}
+
+.icon-circle {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--pink-1), var(--blue-1));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #749dc7;
+}
+
+/* ==== PROFILE SECTION (tanpa grid) ==== */
+.profile-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.profile-card {
+  background: linear-gradient(135deg, var(--pink-2), var(--blue-2));
+  color: #141414;
+  border-radius: 15px;
+  padding: 1.5rem;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.profile-card:hover {
+  transform: translateY(-3px);
+}
+
+.profile-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--pink-1), var(--blue-2));
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.8rem;
+  margin: 0 auto 1rem;
+}
+
+/* ==== RESPONSIVE ==== */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 200px;
+  }
+  .dashboard-main {
+    padding: 1.5rem;
+  }
+}
