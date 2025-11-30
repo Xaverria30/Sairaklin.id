@@ -5,30 +5,53 @@ import { useRouter } from 'next/navigation';
 import { Form, Button, Card, InputGroup } from 'react-bootstrap';
 import { Lock, User, Eye, EyeOff } from 'lucide-react';
 import Image from 'next/image';
-import logo from "./logo.png"; 
+import logo from "./logo.png";
+
+import api from '@/lib/api';
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
     // Validasi kosong
-    if (!username || !password) {
-      setError('Username dan password wajib diisi.');
+    if (!email || !password) {
+      setError('Email dan password wajib diisi.');
       return;
     }
 
-    // Validasi admin
-    if (username === 'admin' && password === 'admin12!') {
+    try {
+      const response = await api.post('/login', {
+        email: email,
+        password: password,
+      });
+
+      const { access_token, user } = response.data;
+
+      if (user.role !== 'admin') {
+        setError('Anda bukan admin.');
+        return;
+      }
+
+      // Store token
+      localStorage.setItem('token', access_token);
+      localStorage.setItem('user', JSON.stringify(user));
+
       router.push('/admin/admin-dashboard');
-    } else {
-      setError('Username atau password admin salah.');
+
+    } catch (err: any) {
+      console.error('Login error:', err);
+      if (err.response && err.response.data && err.response.data.message) {
+        setError(err.response.data.message);
+      } else {
+        setError('Login gagal. Silakan coba lagi.');
+      }
     }
   };
 
@@ -65,18 +88,18 @@ export default function AdminLoginPage() {
         </div>
 
         <Form onSubmit={handleSubmit}>
-          {/* Username */}
+          {/* Email */}
           <Form.Group className="mb-3">
-            <Form.Label>Username</Form.Label>
+            <Form.Label>Email</Form.Label>
             <InputGroup>
               <InputGroup.Text className="bg-white border-end-0 rounded-start-pill">
                 <User size={18} className="text-secondary" />
               </InputGroup.Text>
               <Form.Control
-                type="text"
-                placeholder="Masukkan username admin"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                type="email"
+                placeholder="Masukkan email admin"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="border-start-0 rounded-end-pill"
               />
             </InputGroup>
