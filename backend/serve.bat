@@ -1,0 +1,3 @@
+@echo off
+echo Starting Sairaklin Backend Server...
+php -d extension=pdo_pgsql -d extension=pgsql -S 127.0.0.1:8000 -t public
