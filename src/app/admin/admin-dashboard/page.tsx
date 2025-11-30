@@ -1,11 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "@/app/admin/admin-dashboard/style.module.css";
 import Image from "next/image";
-import logo from "./logo.png"; 
+import logo from "./logo.png";
 import { Calendar, CheckCircle, Clock, XCircle, Pencil } from "lucide-react";
 import { useRouter } from "next/navigation";
+import api from "@/lib/api";
+import { toast, Toaster } from "sonner";
 
 type Order = {
   id: number;
@@ -22,43 +24,71 @@ type AdminProfile = {
   username: string;
   namaLengkap: string;
   phone: string;
+  email?: string;
+  bio?: string;
 };
 
 const AdminDashboardPage: React.FC = () => {
   const router = useRouter();
 
-  const [orders, setOrders] = useState<Order[]>([
-    {
-      id: 1,
-      nama: "user1",
-      layanan: "Pembersihan Rutin",
-      tanggal: "10/11/2025",
-      waktu: "09:00",
-      alamat: "Jl. Sudirman No. 123, Kamar 205",
-      petugas: "P",
-      status: "Selesai",
-    },
-    {
-      id: 2,
-      nama: "user2",
-      layanan: "Pembersihan Deep Clean",
-      tanggal: "12/11/2025",
-      waktu: "14:00",
-      alamat: "Jl. Sudirman No. 123, Kamar 205",
-      petugas: "P",
-      status: "Diproses",
-    },
-  ]);
-
+  const [orders, setOrders] = useState<Order[]>([]);
   const [activeTab, setActiveTab] = useState<"dashboard" | "profile">("dashboard");
   const [profile, setProfile] = useState<AdminProfile>({
-    username: "admin",
-    namaLengkap: "Admin Sairaklin",
-    phone: "+62 812-3456-7890",
+    username: "",
+    namaLengkap: "",
+    phone: "",
   });
 
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<AdminProfile>(profile);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [userRes, ordersRes] = await Promise.all([
+          api.get('/user'),
+          api.get('/admin/orders')
+        ]);
+
+        const userData = userRes.data;
+        setProfile({
+          username: userData.username,
+          namaLengkap: userData.name,
+          phone: userData.phone,
+          email: userData.email,
+          bio: userData.bio,
+        });
+        setForm({
+          username: userData.username,
+          namaLengkap: userData.name,
+          phone: userData.phone,
+          email: userData.email,
+          bio: userData.bio,
+        });
+
+        const ordersData = ordersRes.data.map((o: any) => ({
+          id: o.id,
+          nama: o.user ? o.user.name : 'Unknown User',
+          layanan: o.service_type === 'room' ? 'Paket Kamar' : (o.service_type === 'bathroom' ? 'Paket Kamar Mandi' : 'Paket Lengkap'),
+          tanggal: o.date,
+          waktu: o.time,
+          alamat: o.address,
+          petugas: "Petugas Sairaklin",
+          status: o.status,
+        }));
+        setOrders(ordersData);
+
+      } catch (error) {
+        console.error("Failed to fetch data", error);
+        // toast.error("Gagal memuat data admin");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [router]);
 
   // Hitung summary
   const totalSelesai = orders.filter((o) => o.status === "Selesai").length;
@@ -66,37 +96,73 @@ const AdminDashboardPage: React.FC = () => {
   const totalBatal = orders.filter((o) => o.status === "Dibatalkan").length;
 
   // Update status pesanan
-  const handleStatusChange = (id: number, newStatus: Order["status"]) => {
-    setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, status: newStatus } : o)));
+  const handleStatusChange = async (id: number, newStatus: Order["status"]) => {
+    try {
+      await api.put(`/admin/orders/${id}/status`, { status: newStatus });
+      setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, status: newStatus } : o)));
+      toast.success(`Status pesanan #${id} diperbarui menjadi ${newStatus}`);
+    } catch (error) {
+      console.error(error);
+      toast.error("Gagal memperbarui status pesanan");
+    }
   };
 
   // Hapus pesanan
-  const handleDelete = (id: number) => {
+  const handleDelete = async (id: number) => {
     if (confirm("Apakah Anda yakin ingin menghapus pesanan ini?")) {
-      setOrders((prev) => prev.filter((o) => o.id !== id));
+      try {
+        await api.delete(`/admin/orders/${id}`);
+        setOrders((prev) => prev.filter((o) => o.id !== id));
+        toast.success("Pesanan berhasil dihapus");
+      } catch (error) {
+        console.error(error);
+        toast.error("Gagal menghapus pesanan");
+      }
     }
   };
 
   // Simpan profil admin
-  const saveProfile = () => {
-    setProfile(form);
-    setEditing(false);
-    alert("Profil disimpan (frontend only).");
+  const saveProfile = async () => {
+    try {
+      await api.put('/user', {
+        name: form.namaLengkap,
+        username: form.username,
+        phone: form.phone,
+        bio: form.bio,
+      });
+      setProfile(form);
+      setEditing(false);
+      toast.success("Profil berhasil diperbarui!");
+    } catch (error) {
+      console.error(error);
+      toast.error("Gagal memperbarui profil");
+    }
   };
 
   // Logout
-  const handleLogout = () => {
-    alert("Logout berhasil (frontend only).");
+  const handleLogout = async () => {
+    try {
+      await api.post('/logout');
+    } catch (e) {
+      console.error(e);
+    }
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     router.push("/");
   };
 
+  if (loading) {
+    return <div className="d-flex justify-content-center align-items-center min-vh-100">Loading...</div>;
+  }
+
   return (
     <div className={styles.wrapper}>
+      <Toaster position="top-center" richColors />
       {/* Sidebar */}
       <aside className={styles.sidebar}>
         <div className={styles.logo}>
           <Image
-            src= {logo}
+            src={logo}
             alt="Sairaklin"
             width={80}
             height={80}
@@ -146,7 +212,7 @@ const AdminDashboardPage: React.FC = () => {
                 </span>
                 <div>
                   <p>Pesanan Hari Ini</p>
-                  <h3>0</h3>
+                  <h3>{orders.filter(o => o.tanggal === new Date().toISOString().split('T')[0]).length}</h3>
                 </div>
               </div>
 
@@ -188,43 +254,47 @@ const AdminDashboardPage: React.FC = () => {
               </div>
 
               <div className={styles.ordersList}>
-                {orders.map((order) => (
-                  <div key={order.id} className={styles.orderCard}>
-                    <div className={styles.orderTop}>
-                      <div>
-                        <h4>{order.nama}</h4>
-                        <p>{order.layanan}</p>
+                {orders.length === 0 ? (
+                  <p className="text-muted">Belum ada pesanan.</p>
+                ) : (
+                  orders.map((order) => (
+                    <div key={order.id} className={styles.orderCard}>
+                      <div className={styles.orderTop}>
+                        <div>
+                          <h4>{order.nama}</h4>
+                          <p>{order.layanan}</p>
+                        </div>
+
+                        <select
+                          aria-label={`Ubah status pesanan ${order.id}`}
+                          className={styles.statusTag}
+                          value={order.status}
+                          onChange={(e) => handleStatusChange(order.id, e.target.value as Order["status"])}
+                        >
+                          <option value="Menunggu">Menunggu</option>
+                          <option value="Diproses">Diproses</option>
+                          <option value="Selesai">Selesai</option>
+                          <option value="Dibatalkan">Dibatalkan</option>
+                        </select>
                       </div>
 
-                      <select
-                        aria-label={`Ubah status pesanan ${order.id}`}
-                        className={styles.statusTag}
-                        value={order.status}
-                        onChange={(e) => handleStatusChange(order.id, e.target.value as Order["status"])}
-                      >
-                        <option value="Menunggu">Menunggu</option>
-                        <option value="Diproses">Diproses</option>
-                        <option value="Selesai">Selesai</option>
-                        <option value="Dibatalkan">Dibatalkan</option>
-                      </select>
-                    </div>
+                      <div className={styles.orderDetails}>
+                        <p>
+                          <strong>Tanggal:</strong> {order.tanggal} {order.waktu}
+                        </p>
+                        <p>
+                          <strong>Alamat:</strong> {order.alamat}
+                        </p>
+                      </div>
 
-                    <div className={styles.orderDetails}>
-                      <p>
-                        <strong>Tanggal:</strong> {order.tanggal} {order.waktu}
-                      </p>
-                      <p>
-                        <strong>Alamat:</strong> {order.alamat}
-                      </p>
+                      <div className={styles.orderActions}>
+                        <button className={styles.detailBtn} onClick={() => handleDelete(order.id)} type="button">
+                          Hapus
+                        </button>
+                      </div>
                     </div>
-
-                    <div className={styles.orderActions}>
-                      <button className={styles.detailBtn} onClick={() => handleDelete(order.id)} type="button">
-                        Hapus
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </section>
           </>
@@ -237,7 +307,7 @@ const AdminDashboardPage: React.FC = () => {
 
             <div className={styles.profileGrid}>
               <div className={styles.profileCard}>
-      
+
 
                 <h5>{profile.namaLengkap}</h5>
                 <p>@{profile.username}</p>

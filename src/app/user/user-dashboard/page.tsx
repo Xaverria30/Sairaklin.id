@@ -1,12 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "./user.module.css";
-import logo from "./logo.png"; 
+import logo from "./logo.png";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import api from "@/lib/api";
+import { toast, Toaster } from "sonner";
 
-type OrderStatus = "Menunggu" | "Diproses" | "Selesai";
+type OrderStatus = "Menunggu" | "Diproses" | "Selesai" | "Dibatalkan";
 
 interface Order {
   id: number;
@@ -17,13 +19,13 @@ interface Order {
   alamat: string;
   catatan?: string;
   status: OrderStatus;
+  total_price: number;
 }
 
 interface Profile {
   namaLengkap: string;
   username: string;
   phone: string;
-  password: string;
   email?: string;
   bio?: string;
 }
@@ -33,37 +35,99 @@ const DashboardUser: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"dashboard" | "profile">("dashboard");
   const [editing, setEditing] = useState(false);
   const [profile, setProfile] = useState<Profile>({
-    namaLengkap: "Shania Rahmalia",
-    username: "user",
-    phone: "08123456789",
-    password: "12345678",
-    email: "shania@example.com",
-    bio: "Saya suka kebersihan dan kenyamanan. Mari jaga lingkungan kita!",
+    namaLengkap: "",
+    username: "",
+    phone: "",
+    email: "",
+    bio: "",
   });
+  const [orders, setOrders] = useState<Order[]>([]);
   const [form, setForm] = useState(profile);
-  const [newPassword, setNewPassword] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  // Password state (kept for UI consistency, though backend might not support it yet via this endpoint)
   const [oldPassword, setOldPassword] = useState("");
-  const handleLogout = () => {
-      // Hapus token/session jika ada
-      localStorage.removeItem('token'); // contoh
-      // Redirect ke landing page
-      router.push('/landingpage');
+  const [newPassword, setNewPassword] = useState("");
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [userRes, ordersRes] = await Promise.all([
+          api.get('/user'),
+          api.get('/orders')
+        ]);
+
+        const userData = userRes.data;
+        setProfile({
+          namaLengkap: userData.name,
+          username: userData.username,
+          phone: userData.phone,
+          email: userData.email,
+          bio: userData.bio,
+        });
+        setForm({
+          namaLengkap: userData.name,
+          username: userData.username,
+          phone: userData.phone,
+          email: userData.email,
+          bio: userData.bio,
+        });
+
+        const ordersData = ordersRes.data.map((o: any) => ({
+          id: o.id,
+          jenis: o.service_type === 'room' ? 'Paket Kamar' : (o.service_type === 'bathroom' ? 'Paket Kamar Mandi' : 'Paket Lengkap'),
+          tipe: "Regular Clean", // Placeholder
+          tanggal: `${o.date} • ${o.time}`,
+          petugas: "Petugas Sairaklin", // Placeholder
+          alamat: o.address,
+          catatan: o.special_notes,
+          status: o.status,
+          total_price: o.total_price
+        }));
+        setOrders(ordersData);
+
+      } catch (error) {
+        console.error("Failed to fetch data", error);
+        // toast.error("Gagal memuat data user");
+      } finally {
+        setLoading(false);
+      }
     };
-  const saveProfile = () => {
-    if (oldPassword && oldPassword !== profile.password) {
-      alert("Password lama salah!");
-      return;
+
+    fetchData();
+  }, [router]);
+
+  const handleLogout = async () => {
+    try {
+      await api.post('/logout');
+    } catch (e) {
+      console.error(e);
     }
-    setProfile({ ...form, password: newPassword ? newPassword : profile.password });
-    setEditing(false);
-    setOldPassword("");
-    setNewPassword("");
-    alert("Profil berhasil diperbarui!");
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    router.push('/auth/login');
   };
 
-  // Handler untuk navigasi ke detail pesanan
+  const saveProfile = async () => {
+    try {
+      await api.put('/user', {
+        name: form.namaLengkap,
+        username: form.username,
+        phone: form.phone,
+        bio: form.bio,
+        // email: form.email // Usually email update requires verification
+      });
+      setProfile(form);
+      setEditing(false);
+      toast.success("Profil berhasil diperbarui!");
+    } catch (error) {
+      console.error(error);
+      toast.error("Gagal memperbarui profil");
+    }
+  };
+
   const handleViewDetail = (orderId: number) => {
-    router.push(`/order/detail/order/1`);
+    router.push(`/order/detail/order/${orderId}`);
   };
 
   const handleWhatsApp = (orderId: number) => {
@@ -73,83 +137,13 @@ const DashboardUser: React.FC = () => {
     window.open(`https://wa.me/6281234567890?text=${message}`, "_blank");
   };
 
-  {/* Paket Bersih-Bersih */}
-<section className={styles.packageSection}>
-  <h3 className="mt-4 mb-3">✨ Pilihan Paket Bersih-Bersih</h3>
-  <div className="row g-4">
-    {[
-      {
-        id: 1,
-        name: "Paket Kamar",
-        price: 25000,
-        description: "Pembersihan kamar, sapu, pel, dan perapian tempat tidur.",
-      },
-      {
-        id: 2,
-        name: "Paket Kamar + Kamar Mandi",
-        price: 40000,
-        description: "Bersihkan kamar sekaligus kamar mandi secara menyeluruh.",
-      },
-      {
-        id: 3,
-        name: "Paket Lengkap",
-        price: 60000,
-        description: "Kamar, kamar mandi, dan area sekitar dibersihkan total.",
-      },
-    ].map((pkg) => (
-      <div className="col-md-4" key={pkg.id}>
-        <div
-          className="card h-100 shadow-sm border-0 rounded-4"
-          style={{ transition: "transform 0.2s, box-shadow 0.2s" }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "translateY(-5px)";
-            e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.1)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = "translateY(0)";
-            e.currentTarget.style.boxShadow = "0 2px 6px rgba(0,0,0,0.05)";
-          }}
-        >
-          <div className="card-body d-flex flex-column">
-            <h5 className="card-title fw-bold mb-2">{pkg.name}</h5>
-            <p className="card-text text-muted small mb-3">
-              {pkg.description}
-            </p>
-            <h6 className="fw-semibold text-primary mb-3">
-              Rp {pkg.price.toLocaleString("id-ID")}
-            </h6>
-          </div>
-        </div>
-      </div>
-    ))}
-  </div>
-</section>
-
-
-  const orders: Order[] = [
-    {
-      id: 1,
-      jenis: "Pembersihan Kamar Kos",
-      tipe: "Pembersihan Rutin",
-      tanggal: "Senin, 10 November 2025 • 09:00",
-      petugas: "Perempuan",
-      alamat: "Jl. Sudirman No. 123, Kamar 205",
-      status: "Selesai",
-    },
-    {
-      id: 2,
-      jenis: "Pembersihan + Pewangi",
-      tipe: "Pembersihan Deep Clean",
-      tanggal: "Rabu, 12 November 2025 • 14:00",
-      petugas: "Perempuan",
-      alamat: "Jl. Sudirman No. 123, Kamar 205",
-      catatan: "Tolong fokus di area kamar mandi",
-      status: "Diproses",
-    },
-  ];
+  if (loading) {
+    return <div className="d-flex justify-content-center align-items-center min-vh-100">Loading...</div>;
+  }
 
   return (
     <div className={styles.wrapper}>
+      <Toaster position="top-center" richColors />
       {/* Sidebar */}
       <aside className={styles.sidebar}>
         <div className={styles.logo}>
@@ -219,101 +213,98 @@ const DashboardUser: React.FC = () => {
               </div>
             </section>
 
-           {/* Paket Bersih-Bersih */}
-{/* Paket Bersih-Bersih */}
-<section className="mt-5">
-  <h3 className="fw-bold mb-4 text-dark">
-    ✨ Pilihan Paket Bersih-Bersih
-  </h3>
+            {/* Paket Bersih-Bersih */}
+            <section className="mt-5">
+              <h3 className="fw-bold mb-4 text-dark">
+                ✨ Pilihan Paket Bersih-Bersih
+              </h3>
 
-  <div className="row g-4">
-    {[
-      {
-        id: 1,
-        name: "Paket Kamar",
-        price: 25000,
-        details: [
-          "Menyapu dan mengepel lantai kamar",
-          "Merapikan tempat tidur",
-          "Membersihkan debu pada meja & rak"
-        ],
-        color: "#e8f5e9"
-      },
-      {
-        id: 2,
-        name: "Paket Kamar + Kamar Mandi",
-        price: 40000,
-        details: [
-          "Pembersihan kamar menyeluruh",
-          "Menyikat lantai dan kloset kamar mandi",
-          "Membersihkan cermin & wastafel"
-        ],
-        color: "#e3f2fd"
-      },
-      {
-        id: 3,
-        name: "Paket Lengkap",
-        price: 60000,
-        details: [
-          "Kamar dan kamar mandi bersih total",
-          "Area depan kamar disapu & dipel",
-          "Jendela & ventilasi bebas debu"
-        ],
-        color: "#fff8e1"
-      },
-    ].map((pkg) => (
-      <div className="col-md-4" key={pkg.id}>
-        <div
-          className="card border-0 shadow-sm h-100 rounded-4"
-          style={{
-            backgroundColor: pkg.color,
-            transition: "all 0.3s ease",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "translateY(-5px)";
-            e.currentTarget.style.boxShadow = "0 6px 16px rgba(0,0,0,0.12)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = "translateY(0)";
-            e.currentTarget.style.boxShadow = "0 3px 8px rgba(0,0,0,0.06)";
-          }}
-        >
-          <div className="card-body d-flex flex-column">
-            <div className="mb-3">
-              <h5 className="fw-bold text-dark mb-1">{pkg.name}</h5>
-              <small className="text-muted">
-                Paket hemat untuk kebersihan maksimal.
-              </small>
-            </div>
+              <div className="row g-4">
+                {[
+                  {
+                    id: 1,
+                    name: "Paket Kamar",
+                    price: 25000,
+                    details: [
+                      "Menyapu dan mengepel lantai kamar",
+                      "Merapikan tempat tidur",
+                      "Membersihkan debu pada meja & rak"
+                    ],
+                    color: "#e8f5e9"
+                  },
+                  {
+                    id: 2,
+                    name: "Paket Kamar + Kamar Mandi",
+                    price: 40000,
+                    details: [
+                      "Pembersihan kamar menyeluruh",
+                      "Menyikat lantai dan kloset kamar mandi",
+                      "Membersihkan cermin & wastafel"
+                    ],
+                    color: "#e3f2fd"
+                  },
+                  {
+                    id: 3,
+                    name: "Paket Lengkap",
+                    price: 60000,
+                    details: [
+                      "Kamar dan kamar mandi bersih total",
+                      "Area depan kamar disapu & dipel",
+                      "Jendela & ventilasi bebas debu"
+                    ],
+                    color: "#fff8e1"
+                  },
+                ].map((pkg) => (
+                  <div className="col-md-4" key={pkg.id}>
+                    <div
+                      className="card border-0 shadow-sm h-100 rounded-4"
+                      style={{
+                        backgroundColor: pkg.color,
+                        transition: "all 0.3s ease",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = "translateY(-5px)";
+                        e.currentTarget.style.boxShadow = "0 6px 16px rgba(0,0,0,0.12)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = "translateY(0)";
+                        e.currentTarget.style.boxShadow = "0 3px 8px rgba(0,0,0,0.06)";
+                      }}
+                    >
+                      <div className="card-body d-flex flex-column">
+                        <div className="mb-3">
+                          <h5 className="fw-bold text-dark mb-1">{pkg.name}</h5>
+                          <small className="text-muted">
+                            Paket hemat untuk kebersihan maksimal.
+                          </small>
+                        </div>
 
-            <ul className="text-secondary small mb-4 ps-3">
-              {pkg.details.map((d, i) => (
-                <li key={i}>{d}</li>
-              ))}
-            </ul>
+                        <ul className="text-secondary small mb-4 ps-3">
+                          {pkg.details.map((d, i) => (
+                            <li key={i}>{d}</li>
+                          ))}
+                        </ul>
 
-            <h5 className="fw-semibold text-success mb-4">
-              Rp {pkg.price.toLocaleString("id-ID")}
-            </h5>
+                        <h5 className="fw-semibold text-success mb-4">
+                          Rp {pkg.price.toLocaleString("id-ID")}
+                        </h5>
 
-            <button
-              className="btn btn-success mt-auto py-2 fw-semibold text-white rounded-pill"
-              onClick={() =>
-                router.push(
-                  `/order/order-form?paket=${encodeURIComponent(pkg.name)}&harga=${pkg.price}`
-                )
-              }
-            >
-              Pesan Sekarang
-            </button>
-          </div>
-        </div>
-      </div>
-    ))}
-  </div>
-</section>
-
-
+                        <button
+                          className="btn btn-success mt-auto py-2 fw-semibold text-white rounded-pill"
+                          onClick={() =>
+                            router.push(
+                              `/order/order-form?paket=${encodeURIComponent(pkg.name)}&harga=${pkg.price}`
+                            )
+                          }
+                        >
+                          Pesan Sekarang
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
 
             {/* Orders List */}
             <section className={styles.ordersSection}>
@@ -324,51 +315,54 @@ const DashboardUser: React.FC = () => {
                 </a>
               </div>
               <div className={styles.ordersList}>
-                {orders.map(order => (
-                  <div key={order.id} className={styles.orderCard}>
-                    <div className={styles.orderTop}>
-                      <div>
-                        <h4>{order.jenis}</h4>
-                        <p>{order.tipe}</p>
+                {orders.length === 0 ? (
+                  <p className="text-muted">Belum ada pesanan.</p>
+                ) : (
+                  orders.map(order => (
+                    <div key={order.id} className={styles.orderCard}>
+                      <div className={styles.orderTop}>
+                        <div>
+                          <h4>{order.jenis}</h4>
+                          <p>{order.tipe}</p>
+                        </div>
+                        <span
+                          className={`${styles.statusTag} ${order.status === "Selesai"
+                              ? styles.doneTag
+                              : order.status === "Diproses"
+                                ? styles.processingTag
+                                : styles.waitingTag
+                            }`}
+                        >
+                          {order.status}
+                        </span>
                       </div>
-                      <span
-                        className={`${styles.statusTag} ${
-                          order.status === "Selesai"
-                            ? styles.doneTag
-                            : order.status === "Diproses"
-                            ? styles.processingTag
-                            : styles.waitingTag
-                        }`}
-                      >
-                        {order.status}
-                      </span>
-                    </div>
-                    <div className={styles.orderDetails}>
-                      <div>
-                        <p><strong>Tanggal & Waktu:</strong> {order.tanggal}</p>
-                        <p><strong>Pilihan Petugas:</strong> {order.petugas}</p>
+                      <div className={styles.orderDetails}>
+                        <div>
+                          <p><strong>Tanggal & Waktu:</strong> {order.tanggal}</p>
+                          <p><strong>Pilihan Petugas:</strong> {order.petugas}</p>
+                        </div>
+                        <div>
+                          <p><strong>Alamat:</strong> {order.alamat}</p>
+                          {order.catatan && <p><strong>Catatan:</strong> {order.catatan}</p>}
+                        </div>
                       </div>
-                      <div>
-                        <p><strong>Alamat:</strong> {order.alamat}</p>
-                        {order.catatan && <p><strong>Catatan:</strong> {order.catatan}</p>}
+                      <div className={styles.orderActions}>
+                        <button
+                          className={styles.detailBtn}
+                          onClick={() => handleViewDetail(order.id)}
+                        >
+                          Lihat Detail
+                        </button>
+                        <button
+                          className={styles.waBtn}
+                          onClick={() => handleWhatsApp(order.id)}
+                        >
+                          Chat via WhatsApp
+                        </button>
                       </div>
                     </div>
-                    <div className={styles.orderActions}>
-                      <button 
-                        className={styles.detailBtn}
-                        onClick={() => handleViewDetail(order.id)}
-                      >
-                        Lihat Detail
-                      </button>
-                      <button 
-                        className={styles.waBtn}
-                        onClick={() => handleWhatsApp(order.id)}
-                      >
-                        Chat via WhatsApp
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </section>
           </>
@@ -445,7 +439,8 @@ const DashboardUser: React.FC = () => {
                         className="form-control"
                         type="email"
                         value={form.email || ""}
-                        onChange={e => setForm({ ...form, email: e.target.value })}
+                        readOnly // Email usually not editable directly
+                        disabled
                       />
                     </div>
                     <div className="mb-3">
@@ -458,6 +453,8 @@ const DashboardUser: React.FC = () => {
                         placeholder="Ceritakan sedikit tentang diri Anda..."
                       />
                     </div>
+                    {/* Password fields disabled for now */}
+                    {/* 
                     <div className="mb-3">
                       <label className="form-label small">Password Lama</label>
                       <input
@@ -475,7 +472,8 @@ const DashboardUser: React.FC = () => {
                         value={newPassword}
                         onChange={e => setNewPassword(e.target.value)}
                       />
-                    </div>
+                    </div> 
+                    */}
                     <div className="d-flex gap-2">
                       <button className="btn btn-primary" onClick={saveProfile}>
                         Simpan

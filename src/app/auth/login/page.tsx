@@ -2,39 +2,65 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import logo from "./logo.png"; 
+import logo from "./logo.png";
 import { Form, Button, Card, InputGroup } from 'react-bootstrap';
 import { Lock, User, Eye, EyeOff } from 'lucide-react';
 import Image from 'next/image';
 
+import api from '@/lib/api';
+
 export default function LoginPage() {
   const router = useRouter();
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    if (!username || !password) {
-      setError('Username dan password harus diisi');
+    if (!email || !password) {
+      setError('Email dan password harus diisi');
       return;
     }
 
-    // Cek kalau yang login adalah admin
-    if (username === 'admin' && password === 'admin12!') {
-      router.push('/admin/admin-login');
-      return;
-    }
+    try {
+      const response = await api.post('/login', {
+        email: email,
+        password: password,
+      });
 
-    // Jika bukan admin, maka login user
-    if (username !== 'user' || password !== 'user34#') {
-      setError('Username atau password salah');
-      return;
+      const { access_token, user } = response.data;
+
+      // Store token
+      localStorage.setItem('token', access_token);
+      localStorage.setItem('user', JSON.stringify(user));
+
+      // Redirect based on role
+      if (user.role === 'admin') {
+        router.push('/admin/admin-dashboard');
+      } else {
+        router.push('/user/user-dashboard');
+      }
+
+    } catch (err: any) {
+      console.error('Login error:', err);
+      if (err.response) {
+        // Server responded with a status code outside 2xx
+        if (err.response.data && err.response.data.message) {
+          setError(err.response.data.message);
+        } else {
+          setError(`Login gagal (${err.response.status}). Silakan coba lagi.`);
+        }
+      } else if (err.request) {
+        // Request was made but no response received (Network Error / CORS)
+        setError('Gagal terhubung ke server. Pastikan backend berjalan.');
+      } else {
+        // Something happened in setting up the request
+        setError('Terjadi kesalahan sistem. Silakan coba lagi.');
+      }
     }
-    router.push('/user/user-dashboard');
   };
 
   return (
@@ -70,18 +96,18 @@ export default function LoginPage() {
         </div>
 
         <Form onSubmit={handleSubmit}>
-          {/* Username */}
+          {/* Email */}
           <Form.Group className="mb-3">
-            <Form.Label>Username</Form.Label>
+            <Form.Label>Email</Form.Label>
             <InputGroup>
               <InputGroup.Text className="bg-white border-end-0 rounded-start-pill">
                 <User size={18} className="text-secondary" />
               </InputGroup.Text>
               <Form.Control
-                type="text"
-                placeholder="Masukkan username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                type="email"
+                placeholder="Masukkan email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="border-start-0 rounded-end-pill"
               />
             </InputGroup>
@@ -151,8 +177,8 @@ export default function LoginPage() {
           </small>
         </div>
 
-         {/* Tambahan: Login sebagai admin */}
-         <div className="text-center mt-4">
+        {/* Tambahan: Login sebagai admin */}
+        <div className="text-center mt-4">
           <small className="text-muted">
             Ingin masuk sebagai admin?{' '}
             <a
