@@ -5,7 +5,8 @@ import Image from 'next/image';
 import { Form, Button, Card, InputGroup } from 'react-bootstrap';
 import { Lock, User, UserPlus, Eye, EyeOff, Mail } from 'lucide-react';
 import { toast, Toaster } from 'sonner';
-import logo from "./logo.png"; 
+import logo from "./logo.png";
+import api from '@/lib/api';
 
 export default function RegisterPage() {
   const [fullName, setFullName] = useState('');
@@ -18,37 +19,17 @@ export default function RegisterPage() {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'taken'>('idle');
 
-  // Simulasi data username yang sudah terdaftar
-  const existingUsernames = ['admin', 'user'];
-
-
   const validatePassword = (pass: string): boolean => {
     const regex = /^(?=.*[A-Za-z])(?=.*[!@#$%^&*(),.?":{}|<>]).{6,}$/;
     return regex.test(pass);
   };
 
   const handleUsernameCheck = () => {
-    // Kalau belum diisi, jangan lanjut
-    if (!username.trim()) return;
-
-    // Ubah status jadi "checking" sementara
-    setUsernameStatus('checking');
-
-    // Simulasikan pengecekan ke "database"
-    setTimeout(() => {
-      const isTaken = existingUsernames.some(
-        (u) => u.toLowerCase() === username.toLowerCase()
-      );
-
-      if (isTaken) {
-        setUsernameStatus('taken'); // username sudah digunakan
-      } else {
-        setUsernameStatus('available'); // username tersedia
-      }
-    }, 800); // sedikit lebih cepat biar responsif
+    // Placeholder for username check if needed in future
+    // For now, we rely on backend validation on submit
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const newErrors: { [key: string]: string } = {};
 
@@ -74,19 +55,31 @@ export default function RegisterPage() {
       newErrors.confirmPassword = 'Password tidak cocok.';
     }
 
-    // Validasi username sudah ada
-    if (usernameStatus === 'taken') {
-      newErrors.username = 'Username sudah digunakan, silakan pilih yang lain.';
-    }
-
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) return;
 
-    // Jika semua valid
-    toast.success('Akun berhasil dibuat! Silakan login.');
-    setTimeout(() => {
-      window.location.href = '/user/user-dashboard';
-    }, 1500);
+    try {
+      // Call API
+      await api.post('/register', {
+        name: fullName,
+        email: email,
+        username: username,
+        password: password,
+        password_confirmation: confirmPassword,
+      });
+
+      toast.success('Akun berhasil dibuat! Silakan login.');
+      setTimeout(() => {
+        window.location.href = '/auth/login';
+      }, 1500);
+    } catch (error: any) {
+      console.error('Registration error:', error);
+      if (error.response && error.response.data && error.response.data.message) {
+        toast.error(`Gagal mendaftar: ${error.response.data.message}`);
+      } else {
+        toast.error('Terjadi kesalahan saat mendaftar.');
+      }
+    }
   };
 
   return (
