@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Calendar, Clock, MapPin, CheckCircle, Sparkles, ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Head from 'next/head';
+import api from '@/lib/api';
 
 // Types
 type ServiceType = '' | 'room' | 'bathroom' | 'both';
@@ -42,7 +43,7 @@ const BookingFormPage: React.FC = () => {
     specialNotes: ''
   });
 
-  
+
   const [showToast, setShowToast] = useState(false);
 
   const handleInputChange = (field: keyof FormData, value: string | boolean) => {
@@ -61,26 +62,45 @@ const BookingFormPage: React.FC = () => {
     return !Object.values(newErrors).some(error => error);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validateForm()) return;
 
-    const orderId = 'ORD-' + Date.now();
-    const orderData = {
-      ...formData,
-      id: orderId,
-      createdAt: new Date().toLocaleString('id-ID')
-    };
+    // Calculate prices
+    let servicePrice = 0;
+    if (formData.serviceType === 'room') servicePrice = 35000;
+    else if (formData.serviceType === 'bathroom') servicePrice = 45000;
+    else if (formData.serviceType === 'both') servicePrice = 75000;
 
-    localStorage.setItem('currentOrder', JSON.stringify(orderData));
+    let totalPrice = servicePrice;
+    if (formData.cleaningTools) totalPrice += 15000;
+    if (formData.premiumScent) totalPrice += 5000;
 
-    // Tampilkan toast
-    setShowToast(true);
+    try {
+      await api.post('/orders', {
+        service_type: formData.serviceType,
+        service_price: servicePrice,
+        date: formData.date,
+        time: formData.time,
+        address: formData.address,
+        cleaning_tools: formData.cleaningTools,
+        premium_scent: formData.premiumScent,
+        special_notes: formData.specialNotes,
+        total_price: totalPrice
+      });
 
-    // Redirect setelah 1,5 detik
-    setTimeout(() => {
-      setShowToast(false);
-      router.push('/order/order-detail');
-    }, 1500);
+      // Tampilkan toast
+      setShowToast(true);
+
+      // Redirect setelah 1,5 detik
+      setTimeout(() => {
+        setShowToast(false);
+        router.push('/user/user-dashboard'); // Redirect to dashboard to see the order
+      }, 1500);
+
+    } catch (error: any) {
+      console.error('Order error:', error);
+      alert('Gagal membuat pesanan. Silakan coba lagi.');
+    }
   };
 
   return (
@@ -95,10 +115,10 @@ const BookingFormPage: React.FC = () => {
           <div className="col-lg-8">
 
             {/* Back Button */}
-            <button 
+            <button
               onClick={() => router.push('/user/user-dashboard')}
               className="btn btn-link p-0 mb-3 text-decoration-none d-flex align-items-center"
-              style={{color: '#ec4899'}}
+              style={{ color: '#ec4899' }}
             >
               <ArrowLeft size={20} className="me-2" />
               Kembali ke Dashboard
@@ -110,7 +130,7 @@ const BookingFormPage: React.FC = () => {
                   <div className="d-inline-flex align-items-center justify-content-center rounded-circle p-3 mb-3" style={{
                     background: 'linear-gradient(135deg, #fce7f3 0%, #dbeafe 100%)'
                   }}>
-                    <Sparkles size={48} style={{color: '#ec4899'}} />
+                    <Sparkles size={48} style={{ color: '#ec4899' }} />
                   </div>
                   <h2 className="fw-bold mb-2">Buat Pesanan Baru</h2>
                   <p className="text-muted">Isi formulir di bawah ini untuk memesan layanan kebersihan</p>
@@ -121,7 +141,7 @@ const BookingFormPage: React.FC = () => {
                   <label className="form-label fw-semibold">
                     Jenis Layanan <span className="text-danger">*</span>
                   </label>
-                  <select 
+                  <select
                     className={`form-select ${errors.serviceType ? 'is-invalid' : ''}`}
                     value={formData.serviceType}
                     onChange={(e) => handleInputChange('serviceType', e.target.value)}
@@ -180,26 +200,26 @@ const BookingFormPage: React.FC = () => {
                     Alamat Lengkap / Detail Lokasi <span className="text-danger">*</span>
                   </label>
                   <textarea
-  className={`form-control ${errors.address ? 'is-invalid' : ''}`}
-  placeholder="Contoh: Jl. Sudirman No. 123, Kos Melati, Kamar 5A, Lantai 2&#10;Patokan: Dekat minimarket Alfamart"
-  value={formData.address}
-  onChange={(e) => handleInputChange('address', e.target.value)}
-  onInput={(e) => {
-    const target = e.target as HTMLTextAreaElement;
-    target.style.height = 'auto';
-    target.style.height = `${target.scrollHeight}px`;
-  }}
-  style={{
-    overflow: 'hidden',
-    minHeight: '30px',
-    lineHeight: '0.2',    // jarak antar baris lebih rapat
-    padding: '6px 10px',  // padding lebih compact
-    fontSize: '0.95rem',  // opsional: font sedikit lebih kecil
-    resize: 'none'         // optional supaya user tidak resize manual
-  }}
-  rows={1}
-  autoFocus
-/>
+                    className={`form-control ${errors.address ? 'is-invalid' : ''}`}
+                    placeholder="Contoh: Jl. Sudirman No. 123, Kos Melati, Kamar 5A, Lantai 2&#10;Patokan: Dekat minimarket Alfamart"
+                    value={formData.address}
+                    onChange={(e) => handleInputChange('address', e.target.value)}
+                    onInput={(e) => {
+                      const target = e.target as HTMLTextAreaElement;
+                      target.style.height = 'auto';
+                      target.style.height = `${target.scrollHeight}px`;
+                    }}
+                    style={{
+                      overflow: 'hidden',
+                      minHeight: '30px',
+                      lineHeight: '0.2',    // jarak antar baris lebih rapat
+                      padding: '6px 10px',  // padding lebih compact
+                      fontSize: '0.95rem',  // opsional: font sedikit lebih kecil
+                      resize: 'none'         // optional supaya user tidak resize manual
+                    }}
+                    rows={1}
+                    autoFocus
+                  />
 
 
                   {errors.address && (
@@ -226,7 +246,7 @@ const BookingFormPage: React.FC = () => {
                               <div className="fw-semibold">Sertakan Alat Kebersihan</div>
                               <small className="text-muted">Petugas membawa alat kebersihan lengkap</small>
                             </div>
-                            <span className="badge" style={{backgroundColor: '#fce7f3', color: '#be185d'}}>+Rp 15.000</span>
+                            <span className="badge" style={{ backgroundColor: '#fce7f3', color: '#be185d' }}>+Rp 15.000</span>
                           </div>
                         </label>
                       </div>
@@ -248,7 +268,7 @@ const BookingFormPage: React.FC = () => {
                               <div className="fw-semibold">Gunakan Pewangi Premium</div>
                               <small className="text-muted">Pewangi ruangan aromaterapi</small>
                             </div>
-                            <span className="badge" style={{backgroundColor: '#dbeafe', color: '#1e40af'}}>+Rp 5.000</span>
+                            <span className="badge" style={{ backgroundColor: '#dbeafe', color: '#1e40af' }}>+Rp 5.000</span>
                           </div>
                         </label>
                       </div>
@@ -275,7 +295,7 @@ const BookingFormPage: React.FC = () => {
                   border: '1px solid'
                 }}>
                   <div className="d-flex align-items-start">
-                    <Sparkles size={20} className="me-2 mt-1 flex-shrink-0" style={{color: '#ec4899'}} />
+                    <Sparkles size={20} className="me-2 mt-1 flex-shrink-0" style={{ color: '#ec4899' }} />
                     <div>
                       <strong className="d-block mb-1">Informasi:</strong>
                       <small>Pesanan Anda akan diproses maksimal 1 jam. Kami akan menghubungi Anda via WhatsApp untuk konfirmasi.</small>
@@ -284,7 +304,7 @@ const BookingFormPage: React.FC = () => {
                 </div>
 
                 {/* Submit Button */}
-                <button 
+                <button
                   onClick={handleSubmit}
                   className="btn w-100 d-flex align-items-center justify-content-center text-white"
                   style={{
@@ -327,7 +347,7 @@ const BookingFormPage: React.FC = () => {
               gap: '1rem',
               animation: 'toastIn 0.5s ease-out, toastOut 0.5s ease-in 1.2s forwards'
             }}>
-              <CheckCircle size={32} style={{animation: 'bounce 0.7s ease', color: 'white'}} />
+              <CheckCircle size={32} style={{ animation: 'bounce 0.7s ease', color: 'white' }} />
               <span>Pesanan berhasil dibuat!</span>
             </div>
           </div>
