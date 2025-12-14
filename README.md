@@ -1,106 +1,96 @@
-# Sairaklin.id
+# Sairaklin Project Setup & User Guide
 
-Sairaklin.id adalah aplikasi web layanan kebersihan (cleaning service) yang dibangun dengan **Next.js** (Frontend) dan **Laravel** (Backend API).
+This guide will help you set up and run the Sairaklin application (Backend & Frontend) on your local machine.
 
-## 📋 Prasyarat (Prerequisites)
+## Prerequisites
 
-Sebelum menjalankan aplikasi, pastikan komputer Anda telah terinstal:
-
-1.  **Node.js** (v18 atau terbaru) & **npm**
-2.  **PHP** (v8.2 atau terbaru)
-3.  **Composer** (untuk dependensi PHP)
-4.  **PostgreSQL** (Database)
-
-## 🛠️ Instalasi
-
-### 1. Clone Repository
-Pastikan Anda sudah berada di dalam folder project `Sairaklin.id`.
-
-### 2. Setup Backend (Laravel)
-Buka terminal dan jalankan perintah berikut:
-
-```bash
-cd backend
-composer install
-cp .env.example .env
-php artisan key:generate
-```
-
-**Konfigurasi Database:**
-Buka file `backend/.env` dan sesuaikan konfigurasi database PostgreSQL Anda:
-```env
-DB_CONNECTION=pgsql
-DB_HOST=127.0.0.1
-DB_PORT=5432
-DB_DATABASE=sairaklin
-DB_USERNAME=postgres
-DB_PASSWORD=password_anda
-```
-
-**Migrasi & Seeding:**
-```bash
-php artisan migrate --seed
-```
-*Ini akan membuat tabel dan mengisi data awal (user & admin).*
-
-### 3. Setup Frontend (Next.js)
-Kembali ke root folder dan install dependensi:
-
-```bash
-cd ..
-npm install
-```
-
-## 🚀 Cara Menjalankan Aplikasi
-
-Anda tidak perlu menjalankan backend dan frontend secara terpisah. Kami telah menyediakan script otomatis.
-
-### Menggunakan Script Otomatis (Windows)
-
-Cukup klik dua kali file **`start-app.bat`** di folder root, atau jalankan via terminal:
-
-```bash
-.\start-app.bat
-```
-
-Script ini akan membuka dua jendela terminal baru:
-1.  **Backend Server**: Berjalan di `http://127.0.0.1:8000`
-2.  **Frontend Server**: Berjalan di `http://localhost:3000`
-
-Buka browser dan akses **[http://localhost:3000](http://localhost:3000)**.
+Ensure you have the following installed:
+- **PHP** (v8.1 or higher)
+- **Composer** (Dependency Manager for PHP)
+- **Node.js** (v18 or higher) & **NPM**
+- **Git**
 
 ---
 
-### Cara Menjalankan Manual (Alternatif)
+## 🚀 Quick Start (Automated)
 
-Jika script otomatis tidak berjalan, Anda bisa menjalankannya secara manual:
+We have provided batch scripts to make your life easier.
 
-**Terminal 1 (Backend):**
-```bash
-cd backend
-call serve.bat
-# Atau: php artisan serve
-```
+### 1. First Time Setup
+If this is your first time running the project after cloning, double-click:
+👉 **`setup-project.bat`**
 
-**Terminal 2 (Frontend):**
-```bash
-npm run dev
-```
+This script will:
+- Install Backend dependencies (Composer).
+- Set up the environment file (`.env`) for the backend.
+- Generate the application key.
+- Create the SQLite database and run migrations.
+- Install Frontend dependencies (NPM).
 
-## 👤 Akun Demo
+### 2. Run the Application
+To start both the Backend and Frontend servers simultaneously, double-click:
+👉 **`run-app.bat`**
 
-Gunakan akun berikut untuk masuk ke aplikasi:
+- **Backend** will run at: `http://127.0.0.1:8000`
+- **Frontend** will run at: `http://localhost:3000`
 
-### 1. User (Pelanggan)
-*   **Email:** `shania@example.com`
-*   **Password:** `12345678`
+---
 
-### 2. Admin
-*   **Email:** `admin@sairaklin.id`
-*   **Password:** `admin123`
+## 🛠 Manual Setup (If scripts fail)
 
-## 📂 Struktur Project
+If you prefer to run things manually via the terminal:
 
-*   `src/` - Source code Frontend (Next.js)
-*   `backend/` - Source code Backend (Laravel)
-*   `start-app.bat` - Script launcher
+### Backend (Laravel)
+1. Navigate to the backend folder:
+   ```bash
+   cd Sairaklin
+   ```
+2. Install dependencies:
+   ```bash
+   composer install
+   ```
+3. Create the configuration file:
+   - Copy `.env.example` to `.env` (or create one manually).
+   - Ensure `DB_CONNECTION=sqlite` is set if using SQLite.
+4. Generate App Key:
+   ```bash
+   php artisan key:generate
+   ```
+5. Run Migrations:
+   ```bash
+   php artisan migrate
+   ```
+6. Start Server:
+   ```bash
+   php artisan serve
+   ```
+
+### Frontend (Next.js)
+1. Open a new terminal and navigate to the frontend folder:
+   ```bash
+   cd Sairaklin/frontend
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Start Development Server:
+   ```bash
+   npm run dev
+   ```
+
+---
+
+## 📂 Project Structure
+- **Root Directory**: Contains these setup scripts and docs.
+- **Sairaklin/**: The core Laravel Backend application.
+- **Sairaklin/frontend/**: The Next.js Frontend application.
+
+---
+
+## 🔑 Default Credentials (Development)
+If seeded, or after registering manually:
+- **User Login**: Use the register page on the frontend to create an account.
+- **Admin Access**: (If applicable, check database seeder or register a user and manually promote via database).
+
+Happy Coding! 🚀
