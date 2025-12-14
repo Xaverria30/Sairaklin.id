@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Form, Button, Card, InputGroup } from 'react-bootstrap';
 import { Lock, User, Eye, EyeOff } from 'lucide-react';
@@ -12,8 +12,30 @@ export default function AdminLoginPage() {
   const router = useRouter();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Guest Guard
+  const [isChecking, setIsChecking] = useState(true);
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const userStr = localStorage.getItem('user');
+
+    if (token && userStr) {
+      const user = JSON.parse(userStr);
+      if (user.role === 'admin') {
+        router.push('/admin/admin-dashboard');
+      } else {
+        router.push('/user/user-dashboard');
+      }
+    } else {
+      setIsChecking(false);
+    }
+  }, [router]);
+
+  if (isChecking) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,6 +46,8 @@ export default function AdminLoginPage() {
       return;
     }
 
+    setIsLoading(true);
+
     try {
       const data = await fetchApi('/login', {
         method: 'POST',
@@ -33,6 +57,7 @@ export default function AdminLoginPage() {
 
       if (data.user.role !== 'admin') {
         setError('Akun ini bukan akun admin.');
+        setIsLoading(false);
         return;
       }
 
@@ -43,6 +68,7 @@ export default function AdminLoginPage() {
 
     } catch (err: any) {
       setError(err.message || 'Username atau password salah');
+      setIsLoading(false);
     }
   };
 
@@ -139,10 +165,18 @@ export default function AdminLoginPage() {
 
           <Button
             type="submit"
-            className="w-100 rounded-pill mt-2 fw-semibold text-white"
+            disabled={isLoading}
+            className="w-100 rounded-pill mt-2 fw-semibold text-white d-flex align-items-center justify-content-center gap-2"
             style={{ backgroundColor: '#91a8d0', border: 'none' }}
           >
-            Masuk
+            {isLoading ? (
+              <>
+                <span className="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                <span>Memproses...</span>
+              </>
+            ) : (
+              'Masuk'
+            )}
           </Button>
         </Form>
 

@@ -1,14 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Form, Button, Card, InputGroup } from 'react-bootstrap';
 import { Lock, User, UserPlus, Eye, EyeOff, Mail } from 'lucide-react';
 import { toast, Toaster } from 'sonner';
 import logo from "./logo.png";
 import { fetchApi } from '@/lib/api';
+import { useRouter } from 'next/navigation';
 
 export default function RegisterPage() {
+  const router = useRouter();
+
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
@@ -18,6 +21,27 @@ export default function RegisterPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'taken'>('idle');
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Guest Guard
+  const [isChecking, setIsChecking] = useState(true);
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const userStr = localStorage.getItem('user');
+
+    if (token && userStr) {
+      const user = JSON.parse(userStr);
+      if (user.role === 'admin') {
+        router.push('/admin/admin-dashboard');
+      } else {
+        router.push('/user/user-dashboard');
+      }
+    } else {
+      setIsChecking(false);
+    }
+  }, [router]);
+
+  if (isChecking) return null;
 
   // Simulasi data username yang sudah terdaftar
   const existingUsernames = ['admin', 'user'];
@@ -61,6 +85,8 @@ export default function RegisterPage() {
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) return;
 
+    setIsLoading(true);
+
     try {
       await fetchApi('/register', {
         method: 'POST',
@@ -73,6 +99,7 @@ export default function RegisterPage() {
       }, 1500);
     } catch (err: any) {
       toast.error(err.message || 'Gagal mendaftar');
+      setIsLoading(false);
       if (err.message.includes('Username')) {
         setErrors({ ...newErrors, username: 'Username sudah digunakan' });
       }
@@ -241,10 +268,18 @@ export default function RegisterPage() {
           {/* Submit */}
           <Button
             type="submit"
-            className="w-100 py-2 rounded-pill fw-semibold text-white"
+            disabled={isLoading}
+            className="w-100 py-2 rounded-pill fw-semibold text-white d-flex align-items-center justify-content-center gap-2"
             style={{ backgroundColor: '#91a8d0', border: 'none' }}
           >
-            Daftar Sekarang
+            {isLoading ? (
+              <>
+                <span className="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                <span>Memproses...</span>
+              </>
+            ) : (
+              'Daftar Sekarang'
+            )}
           </Button>
         </Form>
 

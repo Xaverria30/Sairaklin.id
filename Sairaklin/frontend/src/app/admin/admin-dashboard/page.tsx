@@ -34,7 +34,10 @@ const AdminDashboardPage: React.FC = () => {
   // I will assume it needs to be imported. Wait, I should add the import first.
   // Actually, I'll add the loadOrders function and useEffect here.
 
+  const [isLoadingData, setIsLoadingData] = useState(false);
+
   const loadOrders = async () => {
+    setIsLoadingData(true);
     try {
       const data = await fetchApi('/orders');
       const mappedOrders = data.map((o: any) => ({
@@ -50,12 +53,31 @@ const AdminDashboardPage: React.FC = () => {
       setOrders(mappedOrders);
     } catch (error) {
       console.error("Gagal memuat pesanan", error);
+    } finally {
+      setIsLoadingData(false);
     }
   };
 
+  const [isAuthChecking, setIsAuthChecking] = useState(true);
+
   React.useEffect(() => {
-    loadOrders();
-  }, []);
+    const checkAuth = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert("Anda belum login, silakan login terlebih dahulu.");
+        router.push('/auth/login');
+        return;
+      }
+      setIsAuthChecking(false);
+    };
+    checkAuth();
+  }, [router]);
+
+  React.useEffect(() => {
+    if (!isAuthChecking) {
+      loadOrders();
+    }
+  }, [isAuthChecking]);
 
   const [activeTab, setActiveTab] = useState<"dashboard" | "profile">("dashboard");
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
@@ -120,6 +142,16 @@ const AdminDashboardPage: React.FC = () => {
     localStorage.removeItem('admin');
     router.push('/auth/login');
   };
+
+  if (isAuthChecking) {
+    return (
+      <div className="d-flex align-items-center justify-content-center min-vh-100" style={{ background: '#f0f4f8' }}>
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.wrapper}>
@@ -223,7 +255,11 @@ const AdminDashboardPage: React.FC = () => {
                 </span>
                 <div>
                   <p>Pesanan Hari Ini</p>
-                  <h3>{totalHariIni}</h3>
+                  {isLoadingData ? (
+                    <div className={`${styles.skeleton} ${styles.skeletonText}`} style={{ width: '50px', height: '30px' }}></div>
+                  ) : (
+                    <h3>{totalHariIni}</h3>
+                  )}
                 </div>
               </div>
 
@@ -236,7 +272,11 @@ const AdminDashboardPage: React.FC = () => {
                 </span>
                 <div>
                   <p>Total Selesai</p>
-                  <h3>{totalSelesai}</h3>
+                  {isLoadingData ? (
+                    <div className={`${styles.skeleton} ${styles.skeletonText}`} style={{ width: '50px', height: '30px' }}></div>
+                  ) : (
+                    <h3>{totalSelesai}</h3>
+                  )}
                 </div>
               </div>
 
@@ -249,7 +289,11 @@ const AdminDashboardPage: React.FC = () => {
                 </span>
                 <div>
                   <p>Pesanan Pending</p>
-                  <h3>{totalPending}</h3>
+                  {isLoadingData ? (
+                    <div className={`${styles.skeleton} ${styles.skeletonText}`} style={{ width: '50px', height: '30px' }}></div>
+                  ) : (
+                    <h3>{totalPending}</h3>
+                  )}
                 </div>
               </div>
 
@@ -262,7 +306,11 @@ const AdminDashboardPage: React.FC = () => {
                 </span>
                 <div>
                   <p>Pesanan Batal</p>
-                  <h3>{totalBatal}</h3>
+                  {isLoadingData ? (
+                    <div className={`${styles.skeleton} ${styles.skeletonText}`} style={{ width: '50px', height: '30px' }}></div>
+                  ) : (
+                    <h3>{totalBatal}</h3>
+                  )}
                 </div>
               </div>
             </section>
@@ -274,47 +322,58 @@ const AdminDashboardPage: React.FC = () => {
               </div>
 
               <div className={styles.ordersList}>
-                {orders.map((order) => (
-                  <div key={order.id} className={styles.orderCard}>
-                    <div className={styles.orderTop}>
-                      <div>
-                        <h4>{order.nama}</h4>
-                        <p>{order.layanan}</p>
+                {isLoadingData ? (
+                  Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className={`${styles.orderCard} ${styles.skeletonCard}`}>
+                      <div className={`${styles.skeleton} ${styles.skeletonText}`} style={{ width: '40%', marginBottom: '10px' }}></div>
+                      <div className={`${styles.skeleton} ${styles.skeletonText}`} style={{ width: '30%', marginBottom: '20px' }}></div>
+                      <div className={`${styles.skeleton} ${styles.skeletonText}`}></div>
+                      <div className={`${styles.skeleton} ${styles.skeletonText}`}></div>
+                    </div>
+                  ))
+                ) : (
+                  orders.map((order) => (
+                    <div key={order.id} className={styles.orderCard}>
+                      <div className={styles.orderTop}>
+                        <div>
+                          <h4>{order.nama}</h4>
+                          <p>{order.layanan}</p>
+                        </div>
+
+                        <select
+                          className={`${styles.statusSelect} ${styles[order.status.toLowerCase()]}`}
+                          value={order.status}
+                          onChange={(e) => handleStatusChange(order.id, e.target.value as Order["status"])}
+                        >
+                          <option value="Menunggu">Menunggu</option>
+                          <option value="Diproses">Diproses</option>
+                          <option value="Selesai">Selesai</option>
+                          <option value="Dibatalkan">Dibatalkan</option>
+                        </select>
                       </div>
 
-                      <select
-                        className={`${styles.statusSelect} ${styles[order.status.toLowerCase()]}`}
-                        value={order.status}
-                        onChange={(e) => handleStatusChange(order.id, e.target.value as Order["status"])}
-                      >
-                        <option value="Menunggu">Menunggu</option>
-                        <option value="Diproses">Diproses</option>
-                        <option value="Selesai">Selesai</option>
-                        <option value="Dibatalkan">Dibatalkan</option>
-                      </select>
-                    </div>
-
-                    <div className={styles.orderDetails}>
-                      <div>
-                        <p><strong>Tanggal & Waktu:</strong> {order.tanggal} • {order.waktu}</p>
-                        <p><strong>Pilihan Petugas:</strong> {order.petugas}</p>
+                      <div className={styles.orderDetails}>
+                        <div>
+                          <p><strong>Tanggal & Waktu:</strong> {order.tanggal} • {order.waktu}</p>
+                          <p><strong>Pilihan Petugas:</strong> {order.petugas}</p>
+                        </div>
+                        <div>
+                          <p><strong>Alamat:</strong> {order.alamat}</p>
+                        </div>
                       </div>
-                      <div>
-                        <p><strong>Alamat:</strong> {order.alamat}</p>
+
+                      <div className={styles.orderActions}>
+                        <button className={styles.deleteBtn} onClick={() => handleDelete(order.id)}>
+                          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M3 6H5H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            <path d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                          Hapus
+                        </button>
                       </div>
                     </div>
-
-                    <div className={styles.orderActions}>
-                      <button className={styles.deleteBtn} onClick={() => handleDelete(order.id)}>
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M3 6H5H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                          <path d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                        Hapus
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </section>
           </>

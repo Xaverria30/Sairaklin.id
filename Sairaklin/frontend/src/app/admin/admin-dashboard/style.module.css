@@ -814,3 +814,32 @@
     font-size: 1.5rem;
   }
 }
+
+/* Skeleton Loading Animation */
+.skeleton {
+  background: #e2e8f0;
+  background: linear-gradient(110deg, #e2e8f0 8%, #f1f5f9 18%, #e2e8f0 33%);
+  border-radius: 8px;
+  background-size: 200% 100%;
+  animation: pk-shine 1.5s linear infinite;
+  color: transparent !important;
+  pointer-events: none;
+}
+
+.skeletonText {
+  display: inline-block;
+  height: 1em;
+  width: 100%;
+  min-height: 20px;
+  border-radius: 4px;
+}
+
+.skeletonCard {
+  min-height: 100px;
+}
+
+@keyframes pk-shine {
+  to {
+    background-position-x: -200%;
+  }
+}
