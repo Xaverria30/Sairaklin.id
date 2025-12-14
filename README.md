@@ -7,7 +7,7 @@ This guide will help you set up and run the Sairaklin application (Backend & Fro
 Ensure you have the following installed:
 - **PHP** (v8.1 or higher)
 - **Composer** (Dependency Manager for PHP)
-- **Node.js** (v18 or higher) & **NPM**
+- **Node.js** (v18-v21) & **NPM**
 - **Git**
 
 ---
