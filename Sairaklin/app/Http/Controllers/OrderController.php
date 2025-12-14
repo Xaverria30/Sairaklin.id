@@ -10,6 +10,9 @@ class OrderController extends Controller
 {
     public function index(Request $request)
     {
+        if ($request->user()->role === 'admin') {
+            return Order::with('user')->orderBy('created_at', 'desc')->get();
+        }
         return $request->user()->orders()->orderBy('created_at', 'desc')->get();
     }
 
@@ -48,5 +51,29 @@ class OrderController extends Controller
     {
         $order = $request->user()->orders()->where('id', $id)->firstOrFail();
         return response()->json($order);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $order = Order::findOrFail($id);
+
+        if ($request->user()->role !== 'admin') {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $order->update($request->only('status'));
+        return response()->json($order);
+    }
+
+    public function destroy(Request $request, $id)
+    {
+        $order = Order::findOrFail($id);
+
+        if ($request->user()->role !== 'admin') {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $order->delete();
+        return response()->json(['message' => 'Order deleted']);
     }
 }
