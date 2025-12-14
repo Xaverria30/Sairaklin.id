@@ -1,3 +1,0 @@
-@echo off
-echo Starting Sairaklin Backend Server...
-php -d extension=pdo_pgsql -d extension=pgsql artisan serve --host=127.0.0.1 --port=8000
