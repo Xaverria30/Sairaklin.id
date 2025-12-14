@@ -93,4 +93,19 @@ If seeded, or after registering manually:
 - **User Login**: Use the register page on the frontend to create an account.
 - **Admin Access**: (If applicable, check database seeder or register a user and manually promote via database).
 
+---
+
+## 🧹 Cleaning Project (For Sharing/Zip)
+
+If you need to share this project (e.g., zip and send to friend/lecturer), run:
+👉 **`clean-project.bat`**
+
+This will delete:
+- `node_modules` (Frontend dependencies)
+- `.next` (Frontend build files)
+- `vendor` (Backend dependencies)
+
+**Result:** The folder size will drop significantly (e.g., from 500MB+ to <50MB), making it safe and easy to zip.
+**Note:** The recipient will need to run `setup-project.bat` again to reinstall dependencies.
+
 Happy Coding! 🚀
