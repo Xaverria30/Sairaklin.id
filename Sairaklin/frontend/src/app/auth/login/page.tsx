@@ -128,14 +128,14 @@ export default function LoginPage() {
 
           {/* Password */}
           <Form.Group className="mb-1 position-relative">
-            <Form.Label>Password</Form.Label>
+            <Form.Label>Password (Min. 6 Karakter)</Form.Label>
             <InputGroup>
               <InputGroup.Text className="bg-white border-end-0 rounded-start-pill">
                 <Lock size={18} className="text-secondary" />
               </InputGroup.Text>
               <Form.Control
                 type={showPassword ? 'text' : 'password'}
-                placeholder="Masukkan password"
+                placeholder="Harus berisi huruf, angka & simbol"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="border-start-0 rounded-end-pill"
