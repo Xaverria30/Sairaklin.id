@@ -63,7 +63,7 @@ export default function RegisterPage() {
     // Validasi wajib isi
     if (!fullName) newErrors.fullName = 'Nama lengkap wajib diisi.';
 
-    // ✅ Validasi email Gmail
+    // Validasi email Gmail
     if (!email) {
       newErrors.email = 'Email wajib diisi.';
     } else if (!/^[A-Za-z0-9._%+-]+@gmail\.com$/i.test(email)) {
@@ -164,7 +164,7 @@ export default function RegisterPage() {
               </InputGroup.Text>
               <Form.Control
                 type="email"
-                placeholder="Masukkan email Gmail Anda"
+                placeholder="Masukkan akun Gmail Anda"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 isInvalid={!!errors.email}
@@ -185,7 +185,7 @@ export default function RegisterPage() {
               </InputGroup.Text>
               <Form.Control
                 type="text"
-                placeholder="Pilih username unik"
+                placeholder="Buat username unik"
                 value={username}
                 onChange={(e) => {
                   setUsername(e.target.value);
@@ -211,14 +211,14 @@ export default function RegisterPage() {
 
           {/* Password */}
           <Form.Group className="mb-3">
-            <Form.Label>Password</Form.Label>
+            <Form.Label>Password (Min. 6 Karakter)</Form.Label>
             <InputGroup>
               <InputGroup.Text className="bg-white border-end-0 rounded-start-pill">
                 <Lock size={18} className="text-secondary" />
               </InputGroup.Text>
               <Form.Control
                 type={showPassword ? 'text' : 'password'}
-                placeholder="Minimal 6 karakter, huruf & simbol"
+                placeholder="Harus berisi huruf, angka & simbol"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 isInvalid={!!errors.password}
