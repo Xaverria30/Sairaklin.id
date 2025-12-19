@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "./style.module.css";
 import Image from "next/image";
 import logo from "./logo.png";
@@ -29,12 +29,45 @@ const AdminDashboardPage: React.FC = () => {
   const router = useRouter();
 
   const [orders, setOrders] = useState<Order[]>([]);
-
-  // Import fetchApi at the top, but since I can't see the top of the file in this chunk, 
-  // I will assume it needs to be imported. Wait, I should add the import first.
-  // Actually, I'll add the loadOrders function and useEffect here.
-
   const [isLoadingData, setIsLoadingData] = useState(false);
+  const [isAuthChecking, setIsAuthChecking] = useState(true);
+
+  // Popup notifikasi sukses profil
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+
+  // Popup konfirmasi hapus
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+
+  const [profile, setProfile] = useState<AdminProfile>({
+    username: "admin",
+    namaLengkap: "Admin Sairaklin",
+    phone: "+62 851-2345-6789",
+    email: "admin@sairaklin.id",
+  });
+
+  const [editing, setEditing] = useState(false);
+  const [form, setForm] = useState<AdminProfile>(profile);
+  const [activeTab, setActiveTab] = useState<"dashboard" | "profile">("dashboard");
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert("Anda belum login, silakan login terlebih dahulu.");
+        router.push('/auth/login');
+        return;
+      }
+      setIsAuthChecking(false);
+    };
+    checkAuth();
+  }, [router]);
+
+  useEffect(() => {
+    if (!isAuthChecking) {
+      loadOrders();
+    }
+  }, [isAuthChecking]);
 
   const loadOrders = async () => {
     setIsLoadingData(true);
@@ -58,85 +91,60 @@ const AdminDashboardPage: React.FC = () => {
     }
   };
 
-  const [isAuthChecking, setIsAuthChecking] = useState(true);
-
-  React.useEffect(() => {
-    const checkAuth = async () => {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        alert("Anda belum login, silakan login terlebih dahulu.");
-        router.push('/auth/login');
-        return;
-      }
-      setIsAuthChecking(false);
-    };
-    checkAuth();
-  }, [router]);
-
-  React.useEffect(() => {
-    if (!isAuthChecking) {
-      loadOrders();
-    }
-  }, [isAuthChecking]);
-
-  const [activeTab, setActiveTab] = useState<"dashboard" | "profile">("dashboard");
-  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
-  const [profile, setProfile] = useState<AdminProfile>({
-    username: "admin",
-    namaLengkap: "Admin Sairaklin",
-    phone: "+62 851-2345-6789",
-    email: "admin@sairaklin.id",
-  });
-
-  const [editing, setEditing] = useState(false);
-  const [form, setForm] = useState<AdminProfile>(profile);
-
   // Hitung summary
   const totalSelesai = orders.filter((o) => o.status === "Selesai").length;
   const totalPending = orders.filter((o) => o.status === "Menunggu" || o.status === "Diproses").length;
   const totalBatal = orders.filter((o) => o.status === "Dibatalkan").length;
   const totalHariIni = 0; // Bisa diisi dengan logic pengecekan tanggal hari ini
 
-  // Update status pesanan
   const handleStatusChange = async (id: string, newStatus: Order["status"]) => {
     try {
       await fetchApi(`/orders/${id}`, {
         method: 'PUT',
         body: JSON.stringify({ status: newStatus }),
       });
-      // Optimistic update
       setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, status: newStatus } : o)));
     } catch (error) {
       alert("Gagal mengupdate status");
     }
   };
 
-  // Hapus pesanan
-  const handleDelete = async (id: string) => {
-    if (confirm("Apakah Anda yakin ingin menghapus pesanan ini?")) {
-      try {
-        await fetchApi(`/orders/${id}`, {
-          method: 'DELETE',
-        });
-        setOrders((prev) => prev.filter((o) => o.id !== id));
-      } catch (error) {
-        alert("Gagal menghapus pesanan");
-      }
+  // Konfirmasi hapus pesanan dengan popup
+  const handleDeleteClick = (id: string) => {
+    setDeleteTargetId(id);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTargetId) return;
+    try {
+      await fetchApi(`/orders/${deleteTargetId}`, {
+        method: 'DELETE',
+      });
+      setOrders((prev) => prev.filter((o) => o.id !== deleteTargetId));
+    } catch (error) {
+      alert("Gagal menghapus pesanan");
+    } finally {
+      setShowDeleteConfirm(false);
+      setDeleteTargetId(null);
     }
   };
 
-  // Simpan profil admin
+  const cancelDelete = () => {
+    setShowDeleteConfirm(false);
+    setDeleteTargetId(null);
+  };
+
+  // Simpan profil dan tampilkan popup notifikasi yang diinginkan
   const saveProfile = () => {
     setProfile(form);
     setEditing(false);
     setShowSuccessPopup(true);
-
     setTimeout(() => {
       setShowSuccessPopup(false);
-    }, 3000);
+    }, 2800);
   };
 
-  // Logout
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('admin');
@@ -155,17 +163,78 @@ const AdminDashboardPage: React.FC = () => {
 
   return (
     <div className={styles.wrapper}>
+      {/* Popup Notifikasi Profil Berhasil Mirip Gambar */}
       {showSuccessPopup && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 150,
+            backgroundColor: 'rgba(0,0,0,0.1)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            userSelect: 'none',
+            padding: '1rem',
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: 'white',
+              padding: '1rem 2rem',
+              borderRadius: '16px',
+              border: '1px solid #d7c8d7',
+              minWidth: '280px',
+              maxWidth: '90vw',
+              boxShadow: '0 4px 8px rgba(215, 192, 215, 0.7)',
+              color: '#475569',
+              fontWeight: '400',
+              fontSize: '1rem',
+              textAlign: 'center',
+              fontFamily: "'Inter', sans-serif",
+            }}
+          >
+            Profil Anda telah diperbarui
+          </div>
+        </div>
+      )}
+
+      {/* Popup konfirmasi hapus */}
+      {showDeleteConfirm && (
         <div className={styles.successPopup}>
-          <div className={styles.popupContent}>
-            <div className={styles.checkmarkCircle}>
-              <svg className={styles.checkmark} viewBox="0 0 52 52">
-                <circle className={styles.checkmarkCirclePath} cx="26" cy="26" r="25" fill="none" />
-                <path className={styles.checkmarkCheck} fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
-              </svg>
+          <div className={styles.popupContent} style={{ maxWidth: '340px', padding: '1.5rem', textAlign: 'center' }}>
+            <h4 style={{ marginBottom: '1rem', color: '#ec4899', fontWeight: '700' }}>Konfirmasi Hapus</h4>
+            <p style={{ marginBottom: '1.5rem' }}>Apakah Anda yakin ingin menghapus pesanan ini?</p>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem' }}>
+              <button
+                onClick={confirmDelete}
+                style={{
+                  padding: '0.6rem 1.2rem',
+                  borderRadius: '12px',
+                  border: 'none',
+                  backgroundColor: '#ec4899',
+                  color: '#fff',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
+              >
+                Hapus
+              </button>
+              <button
+                onClick={cancelDelete}
+                style={{
+                  padding: '0.6rem 1.2rem',
+                  borderRadius: '12px',
+                  border: '1px solid #ccc',
+                  backgroundColor: '#fff',
+                  color: '#475569',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
+              >
+                Batal
+              </button>
             </div>
-            <h4>Berhasil!</h4>
-            <p>Profil admin telah diperbarui</p>
           </div>
         </div>
       )}
@@ -246,6 +315,7 @@ const AdminDashboardPage: React.FC = () => {
 
             {/* Status Summary */}
             <section className={styles.statusSummary}>
+              {/* ... sama seperti sebelumnya ... */}
               <div className={`${styles.statusCard} ${styles.today}`}>
                 <span className={styles.statusIcon}>
                   <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -262,7 +332,6 @@ const AdminDashboardPage: React.FC = () => {
                   )}
                 </div>
               </div>
-
               <div className={`${styles.statusCard} ${styles.done}`}>
                 <span className={styles.statusIcon}>
                   <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -279,7 +348,6 @@ const AdminDashboardPage: React.FC = () => {
                   )}
                 </div>
               </div>
-
               <div className={`${styles.statusCard} ${styles.processing}`}>
                 <span className={styles.statusIcon}>
                   <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -296,7 +364,6 @@ const AdminDashboardPage: React.FC = () => {
                   )}
                 </div>
               </div>
-
               <div className={`${styles.statusCard} ${styles.cancelled}`}>
                 <span className={styles.statusIcon}>
                   <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -363,7 +430,7 @@ const AdminDashboardPage: React.FC = () => {
                       </div>
 
                       <div className={styles.orderActions}>
-                        <button className={styles.deleteBtn} onClick={() => handleDelete(order.id)}>
+                        <button className={styles.deleteBtn} onClick={() => handleDeleteClick(order.id)}>
                           <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M3 6H5H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                             <path d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -468,7 +535,7 @@ const AdminDashboardPage: React.FC = () => {
                     </div>
                   </>
                 ) : (
-                  <div className="text-center text-muted mt-5">
+                  <div className="text-center text-muted mt-5" style={{ fontStyle: 'normal' }}>
                     <svg className={styles.emptyIcon} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M12 15V17M12 7V13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                       <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
