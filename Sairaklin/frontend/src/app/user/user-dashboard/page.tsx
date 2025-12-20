@@ -621,101 +621,127 @@ const DashboardUser: React.FC = () => {
             </p>
 
             <div className={styles.profileGrid}>
-              <div className={styles.profileCard}>
-                <h5 className="fw-bold mt-2">{profile.namaLengkap}</h5>
-                <p className="text-muted">@{profile.username}</p>
-                <p className="text-muted">{profile.phone}</p>
-                {profile.email && <p className="text-muted">{profile.email}</p>}
-                {profile.bio && <p className="text-muted mt-2">{profile.bio}</p>}
-                <button
-                  className="btn btn-outline-primary mt-3 w-100"
-                  onClick={() => {
-                    setEditing(true);
-                    setForm(profile);
-                  }}
-                >
-                  Edit Profil
-                </button>
+              {/* Left Card - Profile Display */}
+              <div className={styles.profileDisplayCard}>
+                <div className={styles.profileDisplayContent}>
+                  {/* Avatar with Badge */}
+                  <div className={styles.profileAvatarWrapper}>
+                    <div className={styles.profileAvatarLarge}>
+                      {profile.namaLengkap ? profile.namaLengkap.charAt(0).toUpperCase() : 'U'}
+                    </div>
+                    <div className={styles.profileBadge}>Member</div>
+                  </div>
+
+                  {/* Profile Info */}
+                  <h5 className={styles.profileName}>{profile.namaLengkap}</h5>
+                  <p className={styles.profileUsername}>@{profile.username}</p>
+                  <p className={styles.profileContact}>{profile.phone}</p>
+                  {profile.email && <p className={styles.profileContact}>{profile.email}</p>}
+                  {profile.bio && <p className={styles.profileBio}>{profile.bio}</p>}
+
+                  {/* Edit Button */}
+                  <button
+                    className={styles.profileEditBtn}
+                    onClick={() => {
+                      setEditing(true);
+                      setForm(profile);
+                    }}
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M11 5H6C4.89543 5 4 5.89543 4 7V18C4 19.1046 4.89543 20 6 20H17C18.1046 20 19 19.1046 19 18V13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M17.5 2.5C17.8978 2.10217 18.4374 1.87868 19 1.87868C19.5626 1.87868 20.1022 2.10217 20.5 2.5C20.8978 2.89782 21.1213 3.43739 21.1213 4C21.1213 4.56261 20.8978 5.10217 20.5 5.5L11 15H8V12L17.5 2.5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    Edit Profil
+                  </button>
+                </div>
               </div>
 
-              <div className={styles.profileCard}>
+              {/* Right Card - Edit Form or Empty State */}
+              <div className={styles.profileFormCard}>
                 {editing ? (
                   <>
-                    <h6>Edit Profil</h6>
-                    <div className="mb-3">
-                      <label className="form-label small">Nama Lengkap</label>
-                      <input
-                        className="form-control"
-                        value={form.namaLengkap}
-                        onChange={e => setForm({ ...form, namaLengkap: e.target.value })}
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <label className="form-label small">Username</label>
-                      <input
-                        className="form-control"
-                        value={form.username}
-                        onChange={e => setForm({ ...form, username: e.target.value })}
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <label className="form-label small">Nomor Telepon</label>
-                      <input
-                        className="form-control"
-                        value={form.phone}
-                        onChange={e => setForm({ ...form, phone: e.target.value })}
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <label className="form-label small">Email</label>
-                      <input
-                        className="form-control"
-                        type="email"
-                        value={form.email || ""}
-                        onChange={e => setForm({ ...form, email: e.target.value })}
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <label className="form-label small">Bio</label>
-                      <textarea
-                        className="form-control"
-                        rows={3}
-                        value={form.bio || ""}
-                        onChange={e => setForm({ ...form, bio: e.target.value })}
-                        placeholder="Ceritakan sedikit tentang diri Anda..."
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <label className="form-label small">Password Lama</label>
-                      <input
-                        className="form-control"
-                        type="password"
-                        value={oldPassword}
-                        onChange={e => setOldPassword(e.target.value)}
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <label className="form-label small">Password Baru</label>
-                      <input
-                        className="form-control"
-                        type="password"
-                        value={newPassword}
-                        onChange={e => setNewPassword(e.target.value)}
-                      />
-                    </div>
-                    <div className="d-flex gap-2">
-                      <button className="btn btn-primary" onClick={saveProfile}>
-                        Simpan
-                      </button>
-                      <button className="btn btn-outline-secondary" onClick={() => setEditing(false)}>
-                        Batal
-                      </button>
+                    <h6 className={styles.profileFormTitle}>Edit Profil</h6>
+                    <div className={styles.profileFormContent}>
+                      <div className={styles.formGroup}>
+                        <label>Nama Lengkap</label>
+                        <input
+                          type="text"
+                          value={form.namaLengkap}
+                          onChange={e => setForm({ ...form, namaLengkap: e.target.value })}
+                        />
+                      </div>
+                      <div className={styles.formGroup}>
+                        <label>Username</label>
+                        <input
+                          type="text"
+                          value={form.username}
+                          onChange={e => setForm({ ...form, username: e.target.value })}
+                        />
+                      </div>
+                      <div className={styles.formGroup}>
+                        <label>Nomor Telepon</label>
+                        <input
+                          type="text"
+                          value={form.phone}
+                          onChange={e => setForm({ ...form, phone: e.target.value })}
+                        />
+                      </div>
+                      <div className={styles.formGroup}>
+                        <label>Email</label>
+                        <input
+                          type="email"
+                          value={form.email || ""}
+                          onChange={e => setForm({ ...form, email: e.target.value })}
+                        />
+                      </div>
+                      <div className={styles.formGroup}>
+                        <label>Bio</label>
+                        <textarea
+                          rows={3}
+                          value={form.bio || ""}
+                          onChange={e => setForm({ ...form, bio: e.target.value })}
+                          placeholder="Ceritakan sedikit tentang diri Anda..."
+                        />
+                      </div>
+                      <div className={styles.formGroup}>
+                        <label>Password Lama</label>
+                        <input
+                          type="password"
+                          value={oldPassword}
+                          onChange={e => setOldPassword(e.target.value)}
+                          placeholder="Kosongkan jika tidak ingin mengubah password"
+                        />
+                      </div>
+                      <div className={styles.formGroup}>
+                        <label>Password Baru</label>
+                        <input
+                          type="password"
+                          value={newPassword}
+                          onChange={e => setNewPassword(e.target.value)}
+                          placeholder="Kosongkan jika tidak ingin mengubah password"
+                        />
+                      </div>
+                      <div className={styles.formActions}>
+                        <button className={styles.btnSave} onClick={saveProfile}>
+                          Simpan
+                        </button>
+                        <button className={styles.btnCancel} onClick={() => setEditing(false)}>
+                          Batal
+                        </button>
+                      </div>
                     </div>
                   </>
                 ) : (
-                  <div className="text-center text-muted mt-5">
-                    <p>Klik "Edit Profil" untuk mengubah data dan menjadikan profil Anda lebih menarik!</p>
-                    <span role="img" aria-label="sparkles">✨</span>
+                  <div className={styles.profileEmptyState}>
+                    <div className={styles.profileEmptyIcon}>
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M13 16H12V12H11M12 8H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                    <p className={styles.profileEmptyText}>
+                      Klik "Edit Profil" untuk mengubah informasi administrator
+                    </p>
+                    <span className={styles.profileEmptyEmoji}>✨</span>
                   </div>
                 )}
               </div>

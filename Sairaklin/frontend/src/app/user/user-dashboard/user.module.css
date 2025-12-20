@@ -450,60 +450,404 @@
   box-shadow: var(--shadow-md);
 }
 
-/* Profile Section */
-.profileSection {
+/* ==================== PROFILE DISPLAY CARD STYLES ==================== */
+.profileDisplayCard {
   background: var(--white);
   border-radius: 20px;
-  padding: 2rem;
-  box-shadow: var(--shadow-md);
+  padding: 2.5rem;
+  box-shadow: var(--shadow-lg);
   border: 1px solid rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
 }
 
-.profileSection h3 {
+.profileDisplayCard:hover {
+  box-shadow: var(--shadow-xl);
+  transform: translateY(-2px);
+}
+
+.profileDisplayContent {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+/* Avatar with Badge */
+.profileAvatarWrapper {
+  position: relative;
+  margin-bottom: 1.5rem;
+  align-self: flex-start;
+}
+
+.profileAvatarLarge {
+  width: 128px;
+  height: 128px;
+  border-radius: 28px;
+  background: linear-gradient(135deg, var(--pink-3), #9333ea);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 3.5rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  box-shadow: 0 8px 24px rgba(244, 114, 182, 0.4);
+  transition: all 0.3s ease;
+}
+
+.profileDisplayCard:hover .profileAvatarLarge {
+  transform: scale(1.05) rotate(2deg);
+  box-shadow: 0 12px 32px rgba(244, 114, 182, 0.5);
+}
+
+.profileBadge {
+  position: absolute;
+  bottom: -10px;
+  left: 0;
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  color: white;
+  padding: 0.375rem 1rem;
+  border-radius: 16px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(251, 191, 36, 0.4);
+  white-space: nowrap;
+}
+
+/* Profile Info Text */
+.profileName {
   margin: 0 0 0.5rem 0;
   font-size: 1.75rem;
   font-weight: 700;
   color: var(--text-dark);
 }
 
-.profileGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 2rem;
-  margin-top: 2rem;
+.profileUsername {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  color: var(--muted);
+  font-weight: 500;
 }
 
-.profileCard {
-  background: linear-gradient(135deg, #ffffff, #fafbfc);
-  border-radius: 16px;
-  padding: 2rem;
-  box-shadow: var(--shadow-sm);
+.profileContact {
+  margin: 0.25rem 0;
+  font-size: 0.95rem;
+  color: var(--muted);
+}
+
+.profileBio {
+  margin: 1.25rem 0 0 0;
+  font-size: 0.95rem;
+  color: var(--text-dark);
+  line-height: 1.6;
+  text-align: left;
+}
+
+/* Edit Profile Button */
+.profileEditBtn {
+  margin-top: 1.5rem;
+  width: 100%;
+  padding: 0.875rem 1.5rem;
+  background: linear-gradient(135deg, var(--pink-3), var(--blue-3));
+  color: white;
+  border-radius: 14px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 12px rgba(244, 114, 182, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.profileEditBtn svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+}
+
+.profileEditBtn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s ease, height 0.6s ease;
+}
+
+.profileEditBtn:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.profileEditBtn:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 8px 20px rgba(244, 114, 182, 0.4);
+  background: linear-gradient(135deg, #ec4899, #2563eb);
+}
+
+.profileEditBtn:active {
+  transform: translateY(-1px) scale(0.98);
+}
+
+/* ==================== PROFILE FORM CARD STYLES ==================== */
+.profileFormCard {
+  background: var(--white);
+  border-radius: 20px;
+  padding: 2.5rem;
+  box-shadow: var(--shadow-lg);
   border: 1px solid rgba(0, 0, 0, 0.06);
   transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
 }
 
-.profileCard:hover {
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
-}
-
-.profileAvatar {
-  position: relative;
-  width: fit-content;
-  margin: 0 auto 1rem;
-}
-
-.badge {
-  position: absolute;
-  bottom: 0;
-  right: -10px;
-  background: linear-gradient(135deg, #fbbf24, #f59e0b);
-  color: var(--white);
-  padding: 0.25rem 0.75rem;
-  border-radius: 12px;
-  font-size: 0.75rem;
+.profileFormTitle {
+  margin: 0 0 2rem 0;
+  font-size: 1.5rem;
   font-weight: 700;
+  color: var(--text-dark);
+  background: linear-gradient(135deg, var(--pink-3), var(--blue-3));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.profileFormContent {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.formGroup label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.formGroup input,
+.formGroup textarea {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 2px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  font-size: 0.95rem;
+  color: var(--text-dark);
+  transition: all 0.2s ease;
+  background: white;
+  font-family: inherit;
+}
+
+.formGroup input:focus,
+.formGroup textarea:focus {
+  outline: none;
+  border-color: var(--pink-3);
+  box-shadow: 0 0 0 3px rgba(244, 114, 182, 0.1);
+}
+
+.formGroup textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.formGroup input::placeholder,
+.formGroup textarea::placeholder {
+  color: var(--muted);
+  opacity: 0.6;
+}
+
+/* Form Actions */
+.formActions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.btnSave,
+.btnCancel {
+  flex: 1;
+  padding: 0.875rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btnSave {
+  background: linear-gradient(135deg, var(--pink-3), var(--blue-3));
+  color: white;
   box-shadow: var(--shadow-md);
+}
+
+.btnSave:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  background: linear-gradient(135deg, #ec4899, #2563eb);
+}
+
+.btnCancel {
+  background: var(--bg-light);
+  color: var(--text-dark);
+  border: 2px solid rgba(0, 0, 0, 0.08);
+}
+
+.btnCancel:hover {
+  background: #e2e8f0;
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+/* ==================== PROFILE EMPTY STATE ==================== */
+.profileEmptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 400px;
+  padding: 3rem 2rem;
+}
+
+.profileEmptyIcon {
+  width: 96px;
+  height: 96px;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, rgba(244, 114, 182, 0.1), rgba(59, 130, 246, 0.1));
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: float 3s ease-in-out infinite;
+}
+
+.profileEmptyIcon svg {
+  width: 48px;
+  height: 48px;
+  stroke: var(--muted);
+  opacity: 0.5;
+}
+
+.profileEmptyText {
+  margin: 0 0 1rem 0;
+  font-size: 1.05rem;
+  color: var(--muted);
+  line-height: 1.6;
+  max-width: 400px;
+}
+
+.profileEmptyEmoji {
+  font-size: 2.5rem;
+}
+
+/* ==================== RESPONSIVE STYLES ==================== */
+@media (max-width: 1024px) {
+  .profileGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .profileDisplayCard,
+  .profileFormCard {
+    padding: 2rem;
+  }
+
+  .profileAvatarLarge {
+    width: 112px;
+    height: 112px;
+    font-size: 3rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .profileDisplayCard,
+  .profileFormCard {
+    padding: 1.5rem;
+  }
+
+  .profileAvatarLarge {
+    width: 96px;
+    height: 96px;
+    font-size: 2.5rem;
+    border-radius: 24px;
+  }
+
+  .profileName {
+    font-size: 1.5rem;
+  }
+
+  .profileFormTitle {
+    font-size: 1.25rem;
+  }
+
+  .formActions {
+    flex-direction: column;
+  }
+
+  .profileEmptyState {
+    min-height: 300px;
+    padding: 2rem 1rem;
+  }
+
+  .profileEmptyIcon {
+    width: 80px;
+    height: 80px;
+  }
+
+  .profileEmptyIcon svg {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+@media (max-width: 480px) {
+  .profileAvatarLarge {
+    width: 80px;
+    height: 80px;
+    font-size: 2rem;
+    border-radius: 20px;
+  }
+
+  .profileBadge {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.75rem;
+  }
+
+  .profileName {
+    font-size: 1.35rem;
+  }
+
+  .profileUsername,
+  .profileContact {
+    font-size: 0.9rem;
+  }
+
+  .profileBio {
+    font-size: 0.9rem;
+  }
+
+  .formGroup input,
+  .formGroup textarea {
+    padding: 0.75rem 0.875rem;
+    font-size: 0.9rem;
+  }
 }
 
 /* Responsive */
