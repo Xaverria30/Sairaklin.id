@@ -109,3 +109,60 @@ This will delete:
 **Note:** The recipient will need to run `setup-project.bat` again to reinstall dependencies.
 
 Happy Coding! 🚀
+
+---
+
+## 📘 Dokumentasi Sistem & Arsitektur Backend
+
+Berikut adalah penjelasan teknis detail mengenai arsitektur sistem, keamanan, handling error, dan panduan API untuk pengembang.
+
+### 1. 🏗️ Arsitektur Backend & Clean Code
+Sistem ini dibangun menggunakan **Laravel 10** dengan pendekatan **MVC (Model-View-Controller)** yang modular dan terstruktur. Prinsip **OOP** diterapkan secara ketat untuk memastikan kode mudah dipelihara (maintainable) dan dikembangkan (scalable).
+
+*   **Modular**: Logika bisnis dipisahkan ke dalam Controller (`OrderController`, `AuthController`) dan Model (`User`, `Order`), menjaga kode tetap bersih.
+*   **Separation of Concerns**: Routing (`api.php`) hanya menangani path, Controller menangani logika permintaan, dan Model menangani interaksi database.
+
+### 2. 🛡️ Aspek Keamanan (Security)
+Keamanan adalah prioritas utama dalam aplikasi ini. Implementasi mencakup:
+
+*   **Authentication**: Menggunakan **Laravel Sanctum** untuk sistem autentikasi berbasis Token (Bearer Token). Ini memastikan stateless authentication yang aman untuk API.
+*   **Password Hashing**: Semua password pengguna di-hash menggunakan **Bcrypt** melalui `Hash::make()` sebelum disimpan ke database. Password mentah tidak pernah disimpan.
+*   **Authorization**: Pemeriksaan role (`admin` vs `user`) dilakukan secara eksplisit di level controller (contoh: `OrderController@index`) untuk menjaga integritas data.
+*   **SQL Injection Protection**: Aplikasi menggunakan **Eloquent ORM** yang secara otomatis menggunakan *prepared statements* (PDO binding) untuk semua query database, melindunginya dari serangan SQL Injection.
+*   **Mass Assignment Protection**: Model dilindungi menggunakan properti `$fillable` untuk mencegah input data berbahaya.
+
+### 3. ⚠️ Error Handling & Logging
+Sistem memiliki mekanisme penanganan error yang robust untuk memberikan feedback yang jelas namun aman:
+
+*   **Validation**: Semua input pengguna (Register, Login, Order) divalidasi menggunakan `$request->validate()`. Jika gagal, sistem mengembalikan respon JSON standar dengan kode `422 Unprocessable Entity`.
+*   **Exception Handling**: Menggunakan fitur bawaan Laravel dan `try-catch` blok (jika diperlukan) serta `findOrFail` untuk menangani data yang tidak ditemukan (mengembalikan 404 otomatis).
+*   **Logging**: Error server dicatat dalam `storage/logs/laravel.log` untuk keperluan debugging tanpa mengekspos detail sensitif ke pengguna akhir.
+
+### 4. 🚀 Optimasi Performa & Teknologi
+*   **ORM Efisien**: Penggunaan Eloquent dengan Eager Loading (`with('user')`) pada `OrderController` mencegah masalah *N+1 Query Problem*.
+*   **JSON Response**: API dirancang untuk mengembalikan JSON lightweight, mempercepat transfer data antara Backend dan Frontend Next.js.
+
+### 5. 📡 Dokumentasi API (Endpoints)
+
+Berikut adalah daftar endpoint utama yang tersedia:
+
+| Method | Endpoint | Deskripsi | Auth Required |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/register` | Mendaftarkan pengguna baru | ❌ |
+| `POST` | `/api/login` | Login dan mendapatkan Token | ❌ |
+| `GET` | `/api/user` | Mendapatkan profil user login | ✅ |
+| `PUT` | `/api/user` | Update data profil user | ✅ |
+| `GET` | `/api/orders` | List pesanan (User: milik sendiri, Admin: semua) | ✅ |
+| `POST` | `/api/orders` | Membuat pesanan baru | ✅ |
+| `GET` | `/api/orders/{id}` | Detail pesanan spesifik | ✅ |
+| `PUT` | `/api/orders/{id}` | Update status pesanan (Admin) | ✅ (Admin) |
+| `DELETE`| `/api/orders/{id}` | Menghapus pesanan (Admin) | ✅ (Admin) |
+| `POST` | `/api/logout` | Logout dan hapus token | ✅ |
+
+### 6. ✅ Konfirmasi Fitur CRUD & Query
+*   **Create**: User dapat membuat pesanan (`store`).
+*   **Read**: User/Admin dapat melihat list dan detail (`index`, `show`).
+*   **Update**: Admin dapat mengubah status pesanan (`update`), User dapat mengubah profil.
+*   **Delete**: Admin dapat menghapus pesanan (`destroy`).
+
+Semua query database telah dioptimalkan untuk keamanan dan efisiensi, memastikan aplikasi berjalan lancar bahkan dengan data yang bertambah.
