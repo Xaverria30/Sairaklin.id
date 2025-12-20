@@ -19,7 +19,6 @@
     radial-gradient(at 0% 50%, hsla(341, 100%, 96%, 1) 0px, transparent 50%);
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   color: var(--text-primary);
-  overflow-x: hidden;
 }
 
 /* Sidebar */
@@ -38,6 +37,7 @@
   height: 100vh;
   flex-shrink: 0;
   z-index: 50;
+  align-self: flex-start;
 }
 
 .logo {
@@ -130,7 +130,6 @@
 .main {
   flex-grow: 1;
   padding: 2.5rem;
-  overflow-y: auto;
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
