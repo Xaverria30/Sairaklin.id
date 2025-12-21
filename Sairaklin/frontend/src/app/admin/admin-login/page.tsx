@@ -146,17 +146,6 @@ export default function AdminLoginPage() {
             </InputGroup>
           </Form.Group>
 
-          {/* 🔗 Lupa Password */}
-          <div className="text-end mb-3">
-            <a
-              href="/admin/admin-reset-password"
-              className="small text-decoration-none"
-              style={{ color: '#91a8d0' }}
-            >
-              Lupa password?
-            </a>
-          </div>
-
           {error && (
             <div className="alert alert-danger text-center py-2" role="alert">
               {error}
@@ -166,7 +155,7 @@ export default function AdminLoginPage() {
           <Button
             type="submit"
             disabled={isLoading}
-            className="w-100 rounded-pill mt-2 fw-semibold text-white d-flex align-items-center justify-content-center gap-2"
+            className="w-100 rounded-pill mt-4 fw-semibold text-white d-flex align-items-center justify-content-center gap-2"
             style={{ backgroundColor: '#91a8d0', border: 'none' }}
           >
             {isLoading ? (

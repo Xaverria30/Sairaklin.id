@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation'; // added but not used
 import logo from "./logo.png";
 import { Form, Button, Card, InputGroup } from 'react-bootstrap';
 import { Lock, User, Eye, EyeOff } from 'lucide-react';
@@ -10,6 +11,10 @@ import { fetchApi } from '@/lib/api';
 
 export default function LoginPage() {
   const router = useRouter();
+  // added
+  const searchParams = useSearchParams();
+  const loginRequired = searchParams.get('error') === 'login_required';
+
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
@@ -108,6 +113,20 @@ export default function LoginPage() {
           <p className="text-muted mb-0">Masuk ke akun pengguna Anda</p>
         </div>
 
+        {/* added */}
+        {loginRequired && (
+          <div
+            className="text-center py-2 px-3 mb-3 rounded-3"
+            style={{
+              backgroundColor: '#eef3fb',
+              color: '#4a5d85',
+              border: '1px solid #91a8d0',
+            }}
+          >
+            Harap melakukan login terlebih dahulu untuk mengakses Dashboard.
+          </div>
+        )}
+
         <Form onSubmit={handleSubmit}>
           {/* Username */}
           <Form.Group className="mb-3">
@@ -150,17 +169,6 @@ export default function LoginPage() {
             </InputGroup>
           </Form.Group>
 
-          {/* 🔗 Lupa Password */}
-          <div className="text-end mb-3">
-            <a
-              href="/auth/reset-password"
-              className="small text-decoration-none"
-              style={{ color: '#91a8d0' }}
-            >
-              Lupa password?
-            </a>
-          </div>
-
           {error && (
             <div className="alert alert-danger text-center py-2" role="alert">
               {error}
@@ -170,7 +178,7 @@ export default function LoginPage() {
           <Button
             type="submit"
             disabled={isLoading}
-            className="w-100 rounded-pill mt-2 fw-semibold text-white d-flex align-items-center justify-content-center gap-2"
+            className="w-100 rounded-pill mt-4 fw-semibold text-white d-flex align-items-center justify-content-center gap-2"
             style={{ backgroundColor: '#91a8d0', border: 'none' }}
           >
             {isLoading ? (

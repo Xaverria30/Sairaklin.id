@@ -56,8 +56,7 @@ const DashboardUser: React.FC = () => {
     const checkAuth = async () => {
       const token = localStorage.getItem('token');
       if (!token) {
-        alert("Anda belum login, silakan login terlebih dahulu.");
-        router.push('/auth/login');
+        router.push('/auth/login?error=login_required');
         return;
       }
       setIsAuthChecking(false);
@@ -107,8 +106,7 @@ const DashboardUser: React.FC = () => {
       } catch (err: any) {
         console.error("Failed to load data", err);
         if (err.message === 'Unauthenticated.') {
-          alert("Sesi Anda telah berakhir, silakan login kembali.");
-          router.push('/auth/login');
+            router.push('/auth/login?error=session_expired');
         }
       } finally {
         setIsLoadingData(false);
