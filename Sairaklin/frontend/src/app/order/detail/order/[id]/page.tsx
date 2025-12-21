@@ -256,11 +256,6 @@ const OrderDetailPage: React.FC = () => {
                     />
                     <div className="flex-grow-1">
                       <h6 className="fw-bold mb-1">{order.namaPetugas}</h6>
-                      <div className="d-flex align-items-center mb-1">
-                        <Star size={16} className="me-1" style={{ color: '#f59e0b', fill: '#f59e0b' }} />
-                        <span className="fw-semibold">{order.ratingPetugas}</span>
-                        <span className="text-muted small ms-1">/ 5.0</span>
-                      </div>
                       <span className="badge" style={{ backgroundColor: '#dbeafe', color: '#1e40af' }}>
                         Petugas {order.petugas}
                       </span>
