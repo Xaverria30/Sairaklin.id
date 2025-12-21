@@ -54,8 +54,7 @@ const AdminDashboardPage: React.FC = () => {
     const checkAuth = async () => {
       const token = localStorage.getItem('token');
       if (!token) {
-        alert("Anda belum login, silakan login terlebih dahulu.");
-        router.push('/auth/login');
+        router.push('/admin/admin-login?error=login_required');
         return;
       }
       setIsAuthChecking(false);

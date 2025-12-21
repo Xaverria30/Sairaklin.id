@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSearchParams } from 'next/navigation'; // added but not used
+import { useSearchParams } from 'next/navigation'; // added
 import logo from "./logo.png";
 import { Form, Button, Card, InputGroup } from 'react-bootstrap';
 import { Lock, User, Eye, EyeOff } from 'lucide-react';
@@ -123,7 +123,7 @@ export default function LoginPage() {
               border: '1px solid #91a8d0',
             }}
           >
-            Harap melakukan login terlebih dahulu untuk mengakses Dashboard.
+            Harap melakukan login terlebih dahulu untuk mengakses Dashboard User.
           </div>
         )}
 

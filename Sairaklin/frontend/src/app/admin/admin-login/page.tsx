@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation'; /* added */
 import { Form, Button, Card, InputGroup } from 'react-bootstrap';
 import { Lock, User, Eye, EyeOff } from 'lucide-react';
 import Image from 'next/image';
@@ -10,6 +11,9 @@ import { fetchApi } from '@/lib/api';
 
 export default function AdminLoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const errorType = searchParams.get('error');
+
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
@@ -103,6 +107,34 @@ export default function AdminLoginPage() {
           <h5 className="fw-semibold text-dark mb-1">Portal Admin</h5>
           <p className="text-muted mb-0">Masuk untuk mengelola sistem</p>
         </div>
+
+        {errorType === 'login_required' && (
+          <div
+            className="text-center py-2 px-3 mb-3 rounded-3"
+            style={{
+              backgroundColor: '#eef3fb',
+              color: '#4a5d85',
+              border: '1px solid #91a8d0',
+              fontSize: '0.9rem',
+            }}
+          >
+            Anda harus login sebagai admin untuk mengakses halaman Dashboard Admin
+          </div>
+        )}
+
+        {errorType === 'session_expired' && (
+          <div
+            className="text-center py-2 px-3 mb-3 rounded-3"
+            style={{
+              backgroundColor: '#fff3cd',
+              color: '#856404',
+              border: '1px solid #ffeeba',
+              fontSize: '0.9rem',
+            }}
+          >
+            Sesi admin telah berakhir, silakan login kembali
+          </div>
+        )}
 
         <Form onSubmit={handleSubmit}>
           {/* Username */}
