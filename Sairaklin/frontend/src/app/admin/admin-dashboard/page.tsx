@@ -94,6 +94,24 @@ const AdminDashboardPage: React.FC = () => {
     }
   };
 
+  const formatDate = (dateStr: string) => {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString('id-ID', { 
+    weekday: 'long', 
+    day: 'numeric', 
+    month: 'long', 
+    year: 'numeric' 
+  });
+};
+
+const formatTime = (timeStr: string) => {
+  const [hours, minutes] = timeStr.split(":");
+  const date = new Date();
+  date.setHours(Number(hours), Number(minutes)); // Set jam dan menit
+  return date.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+};
+
+
   // Hitung summary
   const totalSelesai = orders.filter((o) => o.status === "Selesai").length;
   const totalPending = orders.filter((o) => o.status === "Menunggu" || o.status === "Diproses").length;
@@ -391,7 +409,7 @@ const AdminDashboardPage: React.FC = () => {
 
                       <div className={styles.orderDetails}>
                         <div>
-                          <p><strong>Tanggal & Waktu:</strong> {order.tanggal} • {order.waktu}</p>
+                          <p><strong>Tanggal & Waktu:</strong> {formatDate(order.tanggal)} • {formatTime(order.waktu)}</p>
                           <p><strong>Pilihan Petugas:</strong> {order.petugas}</p>
                           <p><strong>Nomor WA Pengguna:</strong> {order.nomorWaUser}</p> {/* Menampilkan nomor WA pengguna */}
                         </div>
