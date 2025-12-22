@@ -39,9 +39,15 @@ export default function LandingPage() {
             apartemen, dan rumah. Login sekarang dan rasakan pengalaman bersih
             maksimal dengan tim ahli kami!
           </p>
-          <Link href="/auth/login" className={styles.btnLoginHero} aria-label="Login untuk memesan layanan">
-            Login untuk Memesan
-          </Link>
+       <Link 
+          href="/auth/login" 
+          className={styles.btnLoginHero} 
+          aria-label="Login untuk memesan layanan"
+          style={{ color: 'white' }}  // Menambahkan style inline untuk warna teks putih
+        >
+          Login untuk Memesan
+        </Link>
+
         </div>
         <div className={styles.heroIllustration}>
         </div>
@@ -106,10 +112,10 @@ export default function LandingPage() {
       </section>
 
       {/* Kenapa Harus Sairaklin.id */}
-      <section className={styles.whyChoose}>
+     <section className={styles.section}>
         <h2>Kenapa Harus Sairaklin.id?</h2>
-        <div className={styles.whyCards}>
-          <div className={styles.whyCard}>
+         <div className={styles.testCards}>
+          <div className={styles.testCard}>
             <h4>Tersebar Luas di Indonesia</h4>
             <p>
               Hadir di Jakarta, Tangerang, Depok, Bekasi, Bogor, Bandung, Medan,
@@ -136,30 +142,6 @@ export default function LandingPage() {
           </div>
         </div>
         {/* Tombol Login dihapus dari sini untuk menghindari redundansi */}
-      </section>
-
-      {/* Testimonial */}
-      <section className={styles.section}>
-        <h2>Apa Kata Pengguna?</h2>
-        <div className={styles.testCards}>
-          <div className={styles.testCard}>
-            <p>
-              "Kos saya selalu harum & rapi tiap minggu. Timnya cepat &
-              profesional!"
-            </p>
-            <span>- Siska, Mahasiswa</span>
-          </div>
-          <div className={styles.testCard}>
-            <p>
-              "Deep clean top banget — rumah saya terasa baru setiap minggu."
-            </p>
-            <span>- Dedi, Pekerja Profesional</span>
-          </div>
-          <div className={styles.testCard}>
-            <p>Tim ramah & cekatan. Sangat memudahkan pekerjaan saya!</p>
-            <span>- Rina, Mahasiswa</span>
-          </div>
-        </div>
       </section>
 
       {/* Footer */}
