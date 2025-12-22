@@ -266,7 +266,7 @@ const OrderDetailPage: React.FC = () => {
                     <div>
                       <strong className="d-block mb-1">Informasi Penting:</strong>
                       <small>
-                        Tim kami akan menghubungi Anda melalui WhatsApp dalam waktu maksimal 1 jam
+                        Petugas kami akan menghubungi Anda melalui WhatsApp dalam waktu maksimal 1 jam
                         untuk konfirmasi lebih lanjut.
                       </small>
                     </div>
