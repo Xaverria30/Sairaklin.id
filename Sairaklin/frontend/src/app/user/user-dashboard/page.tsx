@@ -522,18 +522,14 @@ const DashboardUser: React.FC = () => {
           <div className={styles.historySection}>
             <header className={styles.header}>
               <div className={styles.historyHeaderContent}>
-                <div className={styles.historyIconLarge}>
-                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M9 11L12 14L22 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    <path d="M21 12V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </div>
+                {/* Menghapus ikon centang, menyisakan hanya teks */}
                 <div>
                   <h2>Riwayat Pesanan</h2>
                   <p>Lihat semua pesanan yang telah selesai</p>
                 </div>
               </div>
             </header>
+
 
             <div className={styles.historyStats}>
               <div className={styles.historyStatCard}>
