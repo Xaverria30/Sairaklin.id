@@ -64,7 +64,6 @@ const OrderDetailPage: React.FC = () => {
           estimasiSelesai: "2-3 jam",
           namaPetugas: data.status !== 'Menunggu' ? "Petugas Sairaklin" : undefined, // Mock assignment
           fotoPetugas: defaultAvatar,
-          ratingPetugas: 5.0,
         };
         setOrder(mappedOrder);
       } catch (err) {
@@ -261,15 +260,6 @@ const OrderDetailPage: React.FC = () => {
                       </span>
                     </div>
                   </div>
-
-                  <button
-                    onClick={handleWhatsApp}
-                    className="btn w-100 d-flex align-items-center justify-content-center"
-                    style={{ backgroundColor: '#25d366', color: 'white' }}
-                  >
-                    <MessageCircle size={20} className="me-2" />
-                    Hubungi Petugas via WhatsApp
-                  </button>
                 </div>
               </div>
             )}

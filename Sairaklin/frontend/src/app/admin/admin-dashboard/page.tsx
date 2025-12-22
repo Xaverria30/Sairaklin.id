@@ -15,6 +15,8 @@ type Order = {
   waktu: string;
   alamat: string;
   petugas: string;
+  nomorWaUser: string; // Menambahkan nomor WhatsApp pengguna
+  nomorWaPetugas: string; // Menambahkan nomor WhatsApp petugas
   status: "Menunggu" | "Diproses" | "Selesai" | "Dibatalkan";
 };
 
@@ -80,6 +82,8 @@ const AdminDashboardPage: React.FC = () => {
         waktu: o.time,
         alamat: o.address,
         petugas: o.worker_gender === 'male' ? 'Laki-laki' : o.worker_gender === 'female' ? 'Perempuan' : 'Acak',
+        nomorWaUser: o.user ? o.user.phone : 'Tidak Tersedia', // Menampilkan nomor WA pengguna
+        nomorWaPetugas: o.worker_phone, // Menampilkan nomor WA petugas
         status: o.status,
       }));
       setOrders(mappedOrders);
@@ -314,7 +318,6 @@ const AdminDashboardPage: React.FC = () => {
 
             {/* Status Summary */}
             <section className={styles.statusSummary}>
-              {/* ... sama seperti sebelumnya ... */}
               <div className={`${styles.statusCard} ${styles.today}`}>
                 <span className={styles.statusIcon}>
                   <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -344,38 +347,6 @@ const AdminDashboardPage: React.FC = () => {
                     <div className={`${styles.skeleton} ${styles.skeletonText}`} style={{ width: '50px', height: '30px' }}></div>
                   ) : (
                     <h3>{totalSelesai}</h3>
-                  )}
-                </div>
-              </div>
-              <div className={`${styles.statusCard} ${styles.processing}`}>
-                <span className={styles.statusIcon}>
-                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
-                    <path d="M12 6V12L16 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                  </svg>
-                </span>
-                <div>
-                  <p>Pesanan Pending</p>
-                  {isLoadingData ? (
-                    <div className={`${styles.skeleton} ${styles.skeletonText}`} style={{ width: '50px', height: '30px' }}></div>
-                  ) : (
-                    <h3>{totalPending}</h3>
-                  )}
-                </div>
-              </div>
-              <div className={`${styles.statusCard} ${styles.cancelled}`}>
-                <span className={styles.statusIcon}>
-                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
-                    <path d="M15 9L9 15M9 9L15 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                  </svg>
-                </span>
-                <div>
-                  <p>Pesanan Batal</p>
-                  {isLoadingData ? (
-                    <div className={`${styles.skeleton} ${styles.skeletonText}`} style={{ width: '50px', height: '30px' }}></div>
-                  ) : (
-                    <h3>{totalBatal}</h3>
                   )}
                 </div>
               </div>
@@ -422,6 +393,7 @@ const AdminDashboardPage: React.FC = () => {
                         <div>
                           <p><strong>Tanggal & Waktu:</strong> {order.tanggal} • {order.waktu}</p>
                           <p><strong>Pilihan Petugas:</strong> {order.petugas}</p>
+                          <p><strong>Nomor WA Pengguna:</strong> {order.nomorWaUser}</p> {/* Menampilkan nomor WA pengguna */}
                         </div>
                         <div>
                           <p><strong>Alamat:</strong> {order.alamat}</p>
