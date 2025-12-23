@@ -165,4 +165,4 @@ Berikut adalah daftar endpoint utama yang tersedia:
 *   **Update**: Admin dapat mengubah status pesanan (`update`), User dapat mengubah profil.
 *   **Delete**: Admin dapat menghapus pesanan (`destroy`).
 
-Semua query database telah dioptimalkan untuk keamanan dan efisiensi, memastikan aplikasi berjalan lancar bahkan dengan data yang bertambah.
+Semua query database telah dioptimalkan untuk keamanan dan efisiensi, ini juga dapat memastikan aplikasi berjalan lancar bahkan dengan data yang bertambah.
