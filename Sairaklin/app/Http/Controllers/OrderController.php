@@ -11,9 +11,9 @@ class OrderController extends Controller
     public function index(Request $request)
     {
         if ($request->user()->role === 'admin') {
-            return Order::with('user')->orderBy('created_at', 'desc')->get();
+            return Order::with(['user', 'review'])->orderBy('created_at', 'desc')->get();
         }
-        return $request->user()->orders()->orderBy('created_at', 'desc')->get();
+        return $request->user()->orders()->with('review')->orderBy('created_at', 'desc')->get();
     }
 
     public function store(Request $request)

@@ -48,38 +48,12 @@ export default function LandingPage() {
     const loadPublicRatings = async () => {
       setIsRatingLoading(true);
       try {
-        // ✅ coba beberapa endpoint (tanpa ubah backend)
-        let data: any = null;
-
-        try {
-          data = await fetchApi("/public/reviews");
-        } catch (_e1) {
-          try {
-            data = await fetchApi("/reviews");
-          } catch (_e2) {
-            // fallback terakhir: ambil dari orders kalau diizinkan tanpa auth
-            data = await fetchApi("/orders");
-          }
+        const data = await fetchApi("/reviews/stats");
+        if (data) {
+          setRatingAvg(Number(data.average_rating) || 0);
+          setRatingCount(Number(data.total_reviews) || 0);
         }
-
-        const arr = Array.isArray(data) ? data : data?.data ?? [];
-        const reviews: PublicReview[] = (arr || [])
-          .map(pickReview)
-          .filter(Boolean) as PublicReview[];
-
-        if (reviews.length === 0) {
-          setRatingAvg(0);
-          setRatingCount(0);
-          return;
-        }
-
-        const avg =
-          reviews.reduce((sum, r) => sum + (Number(r.rating) || 0), 0) / reviews.length;
-
-        setRatingAvg(avg);
-        setRatingCount(reviews.length);
       } catch (err) {
-        // kalau endpoint memang tidak public, landing page tetap aman (rating tidak tampil)
         setRatingAvg(0);
         setRatingCount(0);
       } finally {
@@ -91,7 +65,7 @@ export default function LandingPage() {
   }, []);
 
   // stars kecil (inline) agar rapi tapi tidak mengubah CSS layout
-  const StarsInline: React.FC<{ value: number }> = ({ value }) => {
+  const StarsInline: React.FC<{ value: number; size?: number }> = ({ value, size = 14 }) => {
     const v = Math.max(0, Math.min(5, value || 0));
     const full = Math.floor(v);
     return (
@@ -100,7 +74,7 @@ export default function LandingPage() {
           <span
             key={i}
             style={{
-              fontSize: 14,
+              fontSize: size,
               lineHeight: 1,
               color: i < full ? "#f59e0b" : "#cbd5e1",
             }}
@@ -108,7 +82,7 @@ export default function LandingPage() {
             ★
           </span>
         ))}
-        <span style={{ marginLeft: 6, fontSize: 12, color: "#64748b", fontWeight: 700 }}>
+        <span style={{ marginLeft: 6, fontSize: size * 0.85, color: "#64748b", fontWeight: 700 }}>
           {v ? v.toFixed(1) : "0.0"}
         </span>
       </span>
@@ -202,42 +176,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Why Us */}
-      <section className={styles.section}>
-        <h2>Mengapa Memilih Kami?</h2>
-        <div className={styles.whyCards}>
-          <div className={styles.whyCard}>
-            <h4>Profesional</h4>
-            <p>Tim berpengalaman & terlatih dengan standar kebersihan tinggi.</p>
-          </div>
-
-          <div className={styles.whyCard}>
-            <h4>Fleksibel & Tepat Waktu</h4>
-            <p>Jadwal sesuai kebutuhan, selalu tepat waktu & transparan.</p>
-          </div>
-
-          {/* ✅ DI SINI rating ditampilkan tanpa ubah tampilan card */}
-          <div className={styles.whyCard}>
-            <h4>Hasil Terbukti</h4>
-            <p>
-              Nyaman, wangi, dan rapi sudah terbukti oleh pelanggan kami.
-              {ratingText}
-            </p>
-
-            {/* Bonus kecil (tidak mengubah layout besar): tampil bintang hanya kalau ada rating */}
-            {!isRatingLoading && ratingCount > 0 && (
-              <div style={{ marginTop: 8 }}>
-                <StarsInline value={ratingAvg} />
-              </div>
-            )}
-          </div>
-
-          <div className={styles.whyCard}>
-            <h4>Harga Terjangkau</h4>
-            <p>Kualitas premium tanpa menguras kantong.</p>
-          </div>
-        </div>
-      </section>
 
       {/* Kenapa Harus Sairaklin.id */}
       <section className={styles.section}>
@@ -269,15 +207,18 @@ export default function LandingPage() {
               OPSIONAL: Card rating tambahan (pakai style yang sama)
               Kalau kamu merasa ini bikin layout berubah (jadi 5 card), hapus blok ini.
               ============================== */}
-          {!isRatingLoading && ratingCount > 0 && (
+          {/* Rating Card */}
+          {!isRatingLoading && (
             <div className={styles.whyCard}>
               <h4>Rating Pelanggan</h4>
-              <p>
+              <p style={{ fontSize: "1.1rem", fontWeight: 600 }}>
                 Rata-rata {ratingAvg.toFixed(1)}/5 dari {ratingCount} ulasan.
               </p>
-              <div style={{ marginTop: 8 }}>
-                <StarsInline value={ratingAvg} />
-              </div>
+              {ratingCount > 0 && (
+                <div style={{ marginTop: 12 }}>
+                  <StarsInline value={ratingAvg} size={32} />
+                </div>
+              )}
             </div>
           )}
         </div>

@@ -86,7 +86,7 @@ const AdminDashboardPage: React.FC = () => {
         const mappedRating =
           o.rating ?? o.review_rating ?? o.review?.rating ?? o.review?.stars ?? null;
         const mappedReview =
-          o.review ?? o.review_text ?? o.review?.comment ?? o.review?.review ?? null;
+          o.review?.comment ?? o.review?.review ?? (typeof o.review === "string" ? o.review : null) ?? o.review_text ?? null;
         const mappedReviewedAt =
           o.reviewed_at ?? o.review?.created_at ?? o.review?.reviewed_at ?? null;
 
@@ -97,8 +97,8 @@ const AdminDashboardPage: React.FC = () => {
             o.service_type === "room"
               ? "Paket Kamar"
               : o.service_type === "bathroom"
-              ? "Paket Kamar Mandi"
-              : "Paket Lengkap",
+                ? "Paket Kamar Mandi"
+                : "Paket Lengkap",
           tanggal: o.date,
           waktu: o.time,
           alamat: o.address,
@@ -106,8 +106,8 @@ const AdminDashboardPage: React.FC = () => {
             o.worker_gender === "male"
               ? "Laki-laki"
               : o.worker_gender === "female"
-              ? "Perempuan"
-              : "Acak",
+                ? "Perempuan"
+                : "Acak",
           nomorWaUser: o.user ? o.user.phone : "Tidak Tersedia",
           nomorWaPetugas: o.worker_phone,
           status: o.status,

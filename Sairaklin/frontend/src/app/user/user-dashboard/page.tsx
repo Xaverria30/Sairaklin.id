@@ -123,7 +123,9 @@ const DashboardUser: React.FC = () => {
     width: 52,
     height: 52,
     borderRadius: 14,
-    border: "1px solid rgba(245,158,11,0.35)",
+    borderWidth: "1px",
+    borderStyle: "solid",
+    borderColor: "rgba(245,158,11,0.35)", // Use longhand to avoid conflict
     background: "rgba(245,158,11,0.12)",
     color: "rgba(15,23,42,0.35)",
     fontSize: 28,
@@ -183,7 +185,7 @@ const DashboardUser: React.FC = () => {
           const mappedRating =
             o.rating ?? o.review_rating ?? o.review?.rating ?? o.review?.stars ?? null;
           const mappedReview =
-            o.review ?? o.review_text ?? o.review?.comment ?? o.review?.review ?? null;
+            o.review?.comment ?? o.review?.review ?? (typeof o.review === "string" ? o.review : null) ?? o.review_text ?? null;
           const mappedReviewedAt =
             o.reviewed_at ?? o.review?.created_at ?? o.review?.reviewed_at ?? null;
 
@@ -196,8 +198,8 @@ const DashboardUser: React.FC = () => {
               o.worker_gender === "male"
                 ? "Laki-Laki"
                 : o.worker_gender === "female"
-                ? "Perempuan"
-                : "Acak",
+                  ? "Perempuan"
+                  : "Acak",
             alamat: o.address,
             status: o.status,
             catatan: o.special_notes,
@@ -639,13 +641,12 @@ const DashboardUser: React.FC = () => {
                           <p>{order.tipe}</p>
                         </div>
                         <span
-                          className={`${styles.statusTag} ${
-                            order.status === "Selesai"
-                              ? styles.doneTag
-                              : order.status === "Diproses"
+                          className={`${styles.statusTag} ${order.status === "Selesai"
+                            ? styles.doneTag
+                            : order.status === "Diproses"
                               ? styles.processingTag
                               : styles.waitingTag
-                          }`}
+                            }`}
                         >
                           {order.status}
                         </span>
@@ -683,28 +684,28 @@ const DashboardUser: React.FC = () => {
                         {/* Tombol review jika pesanan selesai dan belum ada rating */}
                         {order.status === "Selesai" && !order.rating && (
                           <button
-  type="button"
-  className="btn btn-sm px-3 py-2 text-white border-0 shadow-sm d-inline-flex align-items-center gap-2"
-  style={{
-    background: "linear-gradient(135deg, #ffb703 0%, #fb8500 100%)",
-    borderRadius: 999,
-    transition: "transform .15s ease, box-shadow .15s ease, filter .15s ease",
-  }}
-  onMouseEnter={(e) => {
-    e.currentTarget.style.transform = "translateY(-1px)";
-    e.currentTarget.style.filter = "brightness(1.03)";
-    e.currentTarget.style.boxShadow = "0 10px 18px rgba(251,133,0,.25)";
-  }}
-  onMouseLeave={(e) => {
-    e.currentTarget.style.transform = "translateY(0)";
-    e.currentTarget.style.filter = "none";
-    e.currentTarget.style.boxShadow = "0 .125rem .25rem rgba(0,0,0,.075)";
-  }}
-  onClick={() => openReviewModal(order)}
->
-  <span style={{ fontSize: 14 }}>⭐</span>
-  <span className="fw-semibold">Beri Rating</span>
-</button>
+                            type="button"
+                            className="btn btn-sm px-3 py-2 text-white border-0 shadow-sm d-inline-flex align-items-center gap-2"
+                            style={{
+                              background: "linear-gradient(135deg, #ffb703 0%, #fb8500 100%)",
+                              borderRadius: 999,
+                              transition: "transform .15s ease, box-shadow .15s ease, filter .15s ease",
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.transform = "translateY(-1px)";
+                              e.currentTarget.style.filter = "brightness(1.03)";
+                              e.currentTarget.style.boxShadow = "0 10px 18px rgba(251,133,0,.25)";
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.transform = "translateY(0)";
+                              e.currentTarget.style.filter = "none";
+                              e.currentTarget.style.boxShadow = "0 .125rem .25rem rgba(0,0,0,.075)";
+                            }}
+                            onClick={() => openReviewModal(order)}
+                          >
+                            <span style={{ fontSize: 14 }}>⭐</span>
+                            <span className="fw-semibold">Beri Rating</span>
+                          </button>
 
                         )}
                       </div>
@@ -840,30 +841,30 @@ const DashboardUser: React.FC = () => {
                       </button>
 
                       {!order.rating ? (
-                                            <button
-                      type="button"
-                      className="btn btn-sm px-3 py-2 fw-semibold d-inline-flex align-items-center gap-2"
-                      style={{
-                        borderRadius: 999,
-                        border: "1.5px solid rgba(90,169,255,.6)",
-                        color: "#2F80ED",
-                        background: "rgba(90,169,255,.08)",
-                        transition: "all .15s ease",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.transform = "translateY(-1px)";
-                        e.currentTarget.style.boxShadow = "0 10px 18px rgba(47,128,237,.15)";
-                        e.currentTarget.style.background = "rgba(90,169,255,.12)";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.transform = "translateY(0)";
-                        e.currentTarget.style.boxShadow = "none";
-                        e.currentTarget.style.background = "rgba(90,169,255,.08)";
-                      }}
-                      onClick={() => openReviewModal(order)}
-                    >
-                      ⭐ <span>Tambah Rating &amp; Review</span>
-                    </button>
+                        <button
+                          type="button"
+                          className="btn btn-sm px-3 py-2 fw-semibold d-inline-flex align-items-center gap-2"
+                          style={{
+                            borderRadius: 999,
+                            border: "1.5px solid rgba(90,169,255,.6)",
+                            color: "#2F80ED",
+                            background: "rgba(90,169,255,.08)",
+                            transition: "all .15s ease",
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = "translateY(-1px)";
+                            e.currentTarget.style.boxShadow = "0 10px 18px rgba(47,128,237,.15)";
+                            e.currentTarget.style.background = "rgba(90,169,255,.12)";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = "translateY(0)";
+                            e.currentTarget.style.boxShadow = "none";
+                            e.currentTarget.style.background = "rgba(90,169,255,.08)";
+                          }}
+                          onClick={() => openReviewModal(order)}
+                        >
+                          ⭐ <span>Tambah Rating &amp; Review</span>
+                        </button>
 
                       ) : (
                         <button className="btn btn-outline-secondary btn-sm" onClick={() => openReviewModal(order)}>
@@ -986,23 +987,23 @@ const DashboardUser: React.FC = () => {
                       </div>
 
                       {/* textarea */}
-                        <div className="mb-3">
-                          <label className="form-label fw-semibold mb-2">Ulasan</label>
+                      <div className="mb-3">
+                        <label className="form-label fw-semibold mb-2">Ulasan</label>
 
-                          <textarea
-                            className={`form-control shadow-none ${styles.reviewTextarea}`}   // ✅ pakai CSS module
-                            value={reviewText}
-                            onChange={(e) => setReviewText(e.target.value.slice(0, 500))}
-                            placeholder="Contoh: Petugas ramah, hasil bersih, dan sesuai jadwal."
-                            disabled={isSubmittingReview}
-                            rows={6}
-                          />
+                        <textarea
+                          className={`form-control shadow-none ${styles.reviewTextarea}`}   // ✅ pakai CSS module
+                          value={reviewText}
+                          onChange={(e) => setReviewText(e.target.value.slice(0, 500))}
+                          placeholder="Contoh: Petugas ramah, hasil bersih, dan sesuai jadwal."
+                          disabled={isSubmittingReview}
+                          rows={6}
+                        />
 
-                          <div className="d-flex justify-content-between mt-2">
-                            <small className="text-muted">Maksimal 500 karakter</small>
-                            <small className="text-muted">{reviewText.length}/500</small>
-                          </div>
+                        <div className="d-flex justify-content-between mt-2">
+                          <small className="text-muted">Maksimal 500 karakter</small>
+                          <small className="text-muted">{reviewText.length}/500</small>
                         </div>
+                      </div>
 
 
                       <div className={styles.formGroup}>
@@ -1073,94 +1074,94 @@ const DashboardUser: React.FC = () => {
             <div className="modal-dialog modal-dialog-centered" role="document">
               <div className="modal-content border-0 shadow" style={{ overflow: "hidden", borderRadius: 18 }}>
                 {/* header */}
-                  <div
-                    className="modal-header border-0 d-flex align-items-start justify-content-between"
-                    style={{
-                      // Soft, tidak tabrakan: base putih + hint pink/blue yang sangat halus
-                      background:
-                        "radial-gradient(900px circle at 0% 0%, rgba(244,114,182,.22), transparent 45%)," +
-                        "radial-gradient(900px circle at 100% 20%, rgba(96,165,250,.22), transparent 45%)," +
-                        "linear-gradient(135deg, #ffffff 0%, #f8fafc 55%, #ffffff 100%)",
-                      padding: "18px 20px",
-                      borderTopLeftRadius: 14,
-                      borderTopRightRadius: 14,
-                      borderBottom: "1px solid rgba(15,23,42,.08)",
-                    }}
-                  >
-                    <div className="pe-3">
-                      <div className="d-inline-flex align-items-center gap-2 mb-2">
-                        <span
-                          className="badge rounded-pill"
-                          style={{
-                            background: "rgba(15,23,42,.06)",
-                            color: "rgba(15,23,42,.75)",
-                            border: "1px solid rgba(15,23,42,.10)",
-                            fontWeight: 600,
-                            letterSpacing: ".2px",
-                            padding: "6px 10px",
-                          }}
-                        >
-                          Feedback
-                        </span>
-                        <span style={{ color: "rgba(15,23,42,.55)", fontSize: 12 }}>
-                          1 menit
-                        </span>
-                      </div>
-
-                      <h5
-                        className="modal-title mb-1"
+                <div
+                  className="modal-header border-0 d-flex align-items-start justify-content-between"
+                  style={{
+                    // Soft, tidak tabrakan: base putih + hint pink/blue yang sangat halus
+                    background:
+                      "radial-gradient(900px circle at 0% 0%, rgba(244,114,182,.22), transparent 45%)," +
+                      "radial-gradient(900px circle at 100% 20%, rgba(96,165,250,.22), transparent 45%)," +
+                      "linear-gradient(135deg, #ffffff 0%, #f8fafc 55%, #ffffff 100%)",
+                    padding: "18px 20px",
+                    borderTopLeftRadius: 14,
+                    borderTopRightRadius: 14,
+                    borderBottom: "1px solid rgba(15,23,42,.08)",
+                  }}
+                >
+                  <div className="pe-3">
+                    <div className="d-inline-flex align-items-center gap-2 mb-2">
+                      <span
+                        className="badge rounded-pill"
                         style={{
-                          color: "#0f172a",
-                          fontWeight: 800,
+                          background: "rgba(15,23,42,.06)",
+                          color: "rgba(15,23,42,.75)",
+                          border: "1px solid rgba(15,23,42,.10)",
+                          fontWeight: 600,
                           letterSpacing: ".2px",
+                          padding: "6px 10px",
                         }}
                       >
-                        Bagaimana layanan kami?
-                      </h5>
-
-                      <div style={{ color: "rgba(15,23,42,.62)", fontSize: 13, lineHeight: 1.45 }}>
-                        Beri rating dan ulasan untuk membantu meningkatkan kualitas petugas dan layanan kami.
-                      </div>
+                        Feedback
+                      </span>
+                      <span style={{ color: "rgba(15,23,42,.55)", fontSize: 12 }}>
+                        1 menit
+                      </span>
                     </div>
 
-                    <button
-                      type="button"
-                      aria-label="Close"
-                      onClick={closeReviewModal}
-                      className="btn d-inline-flex align-items-center justify-content-center"
+                    <h5
+                      className="modal-title mb-1"
                       style={{
-                        width: 38,
-                        height: 38,
-                        borderRadius: 999,
-                        border: "1px solid rgba(15,23,42,.12)",
-                        background: "rgba(255,255,255,.75)",
-                        boxShadow: "0 10px 22px rgba(15,23,42,.08)",
-                        color: "rgba(15,23,42,.70)",
-                        transition: "all .2s ease",
-                        backdropFilter: "blur(6px)",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.transform = "translateY(-1px)";
-                        e.currentTarget.style.boxShadow = "0 14px 26px rgba(15,23,42,.10)";
-                        e.currentTarget.style.borderColor = "rgba(15,23,42,.18)";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.transform = "translateY(0)";
-                        e.currentTarget.style.boxShadow = "0 10px 22px rgba(15,23,42,.08)";
-                        e.currentTarget.style.borderColor = "rgba(15,23,42,.12)";
+                        color: "#0f172a",
+                        fontWeight: 800,
+                        letterSpacing: ".2px",
                       }}
                     >
-                      <span className="visually-hidden">Close</span>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                        <path
-                          d="M18 6L6 18M6 6l12 12"
-                          stroke="currentColor"
-                          strokeWidth="2.2"
-                          strokeLinecap="round"
-                        />
-                      </svg>
-                    </button>
+                      Bagaimana layanan kami?
+                    </h5>
+
+                    <div style={{ color: "rgba(15,23,42,.62)", fontSize: 13, lineHeight: 1.45 }}>
+                      Beri rating dan ulasan untuk membantu meningkatkan kualitas petugas dan layanan kami.
+                    </div>
                   </div>
+
+                  <button
+                    type="button"
+                    aria-label="Close"
+                    onClick={closeReviewModal}
+                    className="btn d-inline-flex align-items-center justify-content-center"
+                    style={{
+                      width: 38,
+                      height: 38,
+                      borderRadius: 999,
+                      border: "1px solid rgba(15,23,42,.12)",
+                      background: "rgba(255,255,255,.75)",
+                      boxShadow: "0 10px 22px rgba(15,23,42,.08)",
+                      color: "rgba(15,23,42,.70)",
+                      transition: "all .2s ease",
+                      backdropFilter: "blur(6px)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = "translateY(-1px)";
+                      e.currentTarget.style.boxShadow = "0 14px 26px rgba(15,23,42,.10)";
+                      e.currentTarget.style.borderColor = "rgba(15,23,42,.18)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = "translateY(0)";
+                      e.currentTarget.style.boxShadow = "0 10px 22px rgba(15,23,42,.08)";
+                      e.currentTarget.style.borderColor = "rgba(15,23,42,.12)";
+                    }}
+                  >
+                    <span className="visually-hidden">Close</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path
+                        d="M18 6L6 18M6 6l12 12"
+                        stroke="currentColor"
+                        strokeWidth="2.2"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                  </button>
+                </div>
 
                 <div className="modal-body">
                   {/* score card */}
@@ -1272,32 +1273,31 @@ const DashboardUser: React.FC = () => {
                   </div>
 
                   {/* textarea */}
-<div className="mb-3">
-  <label className="form-label fw-semibold mb-2">Ulasan</label>
+                  <div className="mb-3">
+                    <label className="form-label fw-semibold mb-2">Ulasan</label>
 
-  <textarea
-    className="form-control rounded-0 shadow-none reviewTextarea"
-    value={reviewText}
-    onChange={(e) => setReviewText(e.target.value.slice(0, 500))}
-    placeholder="Contoh: Petugas ramah, hasil bersih, dan sesuai jadwal."
-    disabled={isSubmittingReview}
-    rows={6}
-    style={{
-      borderRadius: 0,     // tetap ditulis, tapi kita backup pakai class juga
-      resize: "none",
-      minHeight: 200,
-      maxHeight: 280,
-      overflowY: "auto",
-      padding: "12px 14px",
-      lineHeight: 1.6,
-    }}
-  />
+                    <textarea
+                      className={`form-control shadow-none ${styles.reviewTextarea}`}
+                      value={reviewText}
+                      onChange={(e) => setReviewText(e.target.value.slice(0, 500))}
+                      placeholder="Contoh: Petugas ramah, hasil bersih, dan sesuai jadwal."
+                      disabled={isSubmittingReview}
+                      rows={6}
+                      style={{
+                        resize: "none",
+                        minHeight: 200,
+                        maxHeight: 280,
+                        overflowY: "auto",
+                        padding: "12px 14px",
+                        lineHeight: 1.6,
+                      }}
+                    />
 
-  <div className="d-flex justify-content-between mt-2">
-    <small className="text-muted">Maksimal 500 karakter</small>
-    <small className="text-muted">{reviewText.length}/500</small>
-  </div>
-</div>
+                    <div className="d-flex justify-content-between mt-2">
+                      <small className="text-muted">Maksimal 500 karakter</small>
+                      <small className="text-muted">{reviewText.length}/500</small>
+                    </div>
+                  </div>
 
 
                   {reviewError && <div className="alert alert-danger mt-3 mb-0">{reviewError}</div>}
