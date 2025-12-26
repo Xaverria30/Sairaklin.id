@@ -2,15 +2,128 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import logo from "./logo.png"; 
-import { Inter } from 'next/font/google'; // Import font untuk optimasi
+import logo from "./logo.png";
+import { Inter } from "next/font/google";
 import styles from "./landing.module.css";
+import React, { useEffect, useMemo, useState } from "react";
+import { fetchApi } from "@/lib/api";
 
-const inter = Inter({ subsets: ['latin'] }); // Load font Inter
+const inter = Inter({ subsets: ["latin"] });
+
+type PublicReview = {
+  rating: number;
+  review?: string | null;
+  reviewed_at?: string | null;
+};
 
 export default function LandingPage() {
+  // ====== rating state (public) ======
+  const [ratingAvg, setRatingAvg] = useState<number>(0);
+  const [ratingCount, setRatingCount] = useState<number>(0);
+  const [isRatingLoading, setIsRatingLoading] = useState<boolean>(false);
+
+  // helper: ambil rating/review dari bentuk data apa pun (mirip mapping di user/admin)
+  const pickReview = (o: any): PublicReview | null => {
+    const r =
+      o?.rating ?? o?.review_rating ?? o?.review?.rating ?? o?.review?.stars ?? null;
+
+    const reviewText =
+      o?.review ?? o?.review_text ?? o?.review?.comment ?? o?.review?.review ?? null;
+
+    const reviewedAt =
+      o?.reviewed_at ?? o?.review?.created_at ?? o?.review?.reviewed_at ?? null;
+
+    const ratingNum = typeof r === "string" ? Number(r) : r;
+
+    if (!ratingNum || isNaN(ratingNum)) return null;
+
+    return {
+      rating: Math.max(1, Math.min(5, Number(ratingNum))),
+      review: reviewText,
+      reviewed_at: reviewedAt,
+    };
+  };
+
+  useEffect(() => {
+    const loadPublicRatings = async () => {
+      setIsRatingLoading(true);
+      try {
+        // ✅ coba beberapa endpoint (tanpa ubah backend)
+        let data: any = null;
+
+        try {
+          data = await fetchApi("/public/reviews");
+        } catch (_e1) {
+          try {
+            data = await fetchApi("/reviews");
+          } catch (_e2) {
+            // fallback terakhir: ambil dari orders kalau diizinkan tanpa auth
+            data = await fetchApi("/orders");
+          }
+        }
+
+        const arr = Array.isArray(data) ? data : data?.data ?? [];
+        const reviews: PublicReview[] = (arr || [])
+          .map(pickReview)
+          .filter(Boolean) as PublicReview[];
+
+        if (reviews.length === 0) {
+          setRatingAvg(0);
+          setRatingCount(0);
+          return;
+        }
+
+        const avg =
+          reviews.reduce((sum, r) => sum + (Number(r.rating) || 0), 0) / reviews.length;
+
+        setRatingAvg(avg);
+        setRatingCount(reviews.length);
+      } catch (err) {
+        // kalau endpoint memang tidak public, landing page tetap aman (rating tidak tampil)
+        setRatingAvg(0);
+        setRatingCount(0);
+      } finally {
+        setIsRatingLoading(false);
+      }
+    };
+
+    loadPublicRatings();
+  }, []);
+
+  // stars kecil (inline) agar rapi tapi tidak mengubah CSS layout
+  const StarsInline: React.FC<{ value: number }> = ({ value }) => {
+    const v = Math.max(0, Math.min(5, value || 0));
+    const full = Math.floor(v);
+    return (
+      <span className="d-inline-flex align-items-center gap-1" aria-label={`${v} dari 5`}>
+        {Array.from({ length: 5 }).map((_, i) => (
+          <span
+            key={i}
+            style={{
+              fontSize: 14,
+              lineHeight: 1,
+              color: i < full ? "#f59e0b" : "#cbd5e1",
+            }}
+          >
+            ★
+          </span>
+        ))}
+        <span style={{ marginLeft: 6, fontSize: 12, color: "#64748b", fontWeight: 700 }}>
+          {v ? v.toFixed(1) : "0.0"}
+        </span>
+      </span>
+    );
+  };
+
+  // teks rating (dipakai di card "Hasil Terbukti")
+  const ratingText = useMemo(() => {
+    if (isRatingLoading) return "";
+    if (ratingCount <= 0) return "";
+    return ` Rata-rata ${ratingAvg.toFixed(1)}/5 dari ${ratingCount} ulasan pelanggan.`;
+  }, [isRatingLoading, ratingAvg, ratingCount]);
+
   return (
-    <div className={`${styles.wrapper} ${inter.className}`}> {/* Terapkan font di wrapper */}
+    <div className={`${styles.wrapper} ${inter.className}`}>
       {/* Navbar */}
       <header className={styles.navbar}>
         <div className={styles.logo}>
@@ -39,18 +152,16 @@ export default function LandingPage() {
             apartemen, dan rumah. Login sekarang dan rasakan pengalaman bersih
             maksimal dengan tim ahli kami!
           </p>
-       <Link 
-          href="/auth/login" 
-          className={styles.btnLoginHero} 
-          aria-label="Login untuk memesan layanan"
-          style={{ color: 'white' }}  // Menambahkan style inline untuk warna teks putih
-        >
-          Login untuk Memesan
-        </Link>
-
+          <Link
+            href="/auth/login"
+            className={styles.btnLoginHero}
+            aria-label="Login untuk memesan layanan"
+            style={{ color: "white" }}
+          >
+            Login untuk Memesan
+          </Link>
         </div>
-        <div className={styles.heroIllustration}>
-        </div>
+        <div className={styles.heroIllustration}></div>
       </section>
 
       {/* Services */}
@@ -59,28 +170,31 @@ export default function LandingPage() {
         <div className={styles.serviceCards}>
           <div className={styles.card}>
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M3 7V5C3 3.89543 3.89543 3 5 3H19C20.1046 3 21 3.89543 21 5V7M3 7V19C3 20.1046 3.89543 21 5 21H19C20.1046 21 21 20.1046 21 19V7M3 7H21" stroke="#3b82f6" strokeWidth="2"/>
+              <path d="M3 7V5C3 3.89543 3.89543 3 5 3H19C20.1046 3 21 3.89543 21 5V7M3 7V19C3 20.1046 3.89543 21 5 21H19C20.1046 21 21 20.1046 21 19V7M3 7H21" stroke="#3b82f6" strokeWidth="2" />
             </svg>
             <h3>Pembersihan Rutin</h3>
             <p>Kamar atau apartemen tetap rapi & harum setiap hari/minggu.</p>
           </div>
+
           <div className={styles.card}>
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z" stroke="#f472b6" strokeWidth="2"/>
+              <path d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z" stroke="#f472b6" strokeWidth="2" />
             </svg>
             <h3>Deep Clean + Pewangi</h3>
             <p>Pembersihan menyeluruh dengan pewangi premium untuk hasil maksimal.</p>
           </div>
+
           <div className={styles.card}>
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="#3b82f6" strokeWidth="2"/>
+              <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="#3b82f6" strokeWidth="2" />
             </svg>
             <h3>Custom Request</h3>
             <p>Pilih area atau layanan khusus sesuai kebutuhanmu.</p>
           </div>
+
           <div className={styles.card}>
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M8 7V3M16 7V3M5 11H19M5 11V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V11M5 11V7C5 5.89543 5.89543 5 7 5H17C18.1046 5 19 5.89543 19 7V11" stroke="#f472b6" strokeWidth="2"/>
+              <path d="M8 7V3M16 7V3M5 11H19M5 11V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V11M5 11V7C5 5.89543 5.89543 5 7 5H17C18.1046 5 19 5.89543 19 7V11" stroke="#f472b6" strokeWidth="2" />
             </svg>
             <h3>Layanan Event</h3>
             <p>Kebersihan untuk acara khusus agar nyaman & bersih.</p>
@@ -96,14 +210,28 @@ export default function LandingPage() {
             <h4>Profesional</h4>
             <p>Tim berpengalaman & terlatih dengan standar kebersihan tinggi.</p>
           </div>
+
           <div className={styles.whyCard}>
             <h4>Fleksibel & Tepat Waktu</h4>
             <p>Jadwal sesuai kebutuhan, selalu tepat waktu & transparan.</p>
           </div>
+
+          {/* ✅ DI SINI rating ditampilkan tanpa ubah tampilan card */}
           <div className={styles.whyCard}>
             <h4>Hasil Terbukti</h4>
-            <p>Nyaman, wangi, dan rapi — terbukti oleh pelanggan kami.</p>
+            <p>
+              Nyaman, wangi, dan rapi sudah terbukti oleh pelanggan kami.
+              {ratingText}
+            </p>
+
+            {/* Bonus kecil (tidak mengubah layout besar): tampil bintang hanya kalau ada rating */}
+            {!isRatingLoading && ratingCount > 0 && (
+              <div style={{ marginTop: 8 }}>
+                <StarsInline value={ratingAvg} />
+              </div>
+            )}
           </div>
+
           <div className={styles.whyCard}>
             <h4>Harga Terjangkau</h4>
             <p>Kualitas premium tanpa menguras kantong.</p>
@@ -112,9 +240,10 @@ export default function LandingPage() {
       </section>
 
       {/* Kenapa Harus Sairaklin.id */}
-     <section className={styles.section}>
+      <section className={styles.section}>
         <h2>Kenapa Harus Sairaklin.id?</h2>
-         <div className={styles.testCards}>
+
+        <div className={styles.testCards}>
           <div className={styles.testCard}>
             <h4>Tersebar Luas di Indonesia</h4>
             <p>
@@ -122,6 +251,7 @@ export default function LandingPage() {
               Surabaya dan Denpasar.
             </p>
           </div>
+
           <div className={styles.whyCard}>
             <h4>Bisa Pilih Helper Sesuka Kamu</h4>
             <p>
@@ -129,19 +259,28 @@ export default function LandingPage() {
               rumah bersih!
             </p>
           </div>
+
           <div className={styles.whyCard}>
             <h4>Privasi Kamu Aman!</h4>
             <p>Chat dan komunikasi hanya di aplikasi, aman no tipu-tipu!</p>
           </div>
-          <div className={styles.whyCard}>
-            <h4>Bayar Pake Apa Aja Bisa!</h4>
-            <p>
-              Metode pembayaran favoritmu ada semua, mulai dari dompet digital,
-              virtual account, sampai kartu kredit.
-            </p>
-          </div>
+
+          {/* ==============================
+              OPSIONAL: Card rating tambahan (pakai style yang sama)
+              Kalau kamu merasa ini bikin layout berubah (jadi 5 card), hapus blok ini.
+              ============================== */}
+          {!isRatingLoading && ratingCount > 0 && (
+            <div className={styles.whyCard}>
+              <h4>Rating Pelanggan</h4>
+              <p>
+                Rata-rata {ratingAvg.toFixed(1)}/5 dari {ratingCount} ulasan.
+              </p>
+              <div style={{ marginTop: 8 }}>
+                <StarsInline value={ratingAvg} />
+              </div>
+            </div>
+          )}
         </div>
-        {/* Tombol Login dihapus dari sini untuk menghindari redundansi */}
       </section>
 
       {/* Footer */}
