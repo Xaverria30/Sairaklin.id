@@ -1,0 +1,83 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sairaklin-app
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+      - ./.env.docker:/var/www/.env
+    entrypoint: [ "sh", "/var/www/docker-entrypoint.sh" ]
+    depends_on:
+      - db
+    networks:
+      - sairaklin-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: sairaklin-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./:/var/www
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - app
+    networks:
+      - sairaklin-network
+
+  db:
+    image: mysql:8.0
+    container_name: sairaklin-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: sairaklin
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_USER: sairaklin_user
+      MYSQL_PASSWORD: password
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+      - sairaklin-network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: sairaklin-pma
+    restart: unless-stopped
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+    ports:
+      - "8081:80"
+    depends_on:
+      - db
+    networks:
+      - sairaklin-network
+
+  frontend:
+    image: node:20-alpine
+    container_name: sairaklin-frontend
+    working_dir: /var/www/frontend
+    command: sh -c "npm install && npm run dev -- -H 0.0.0.0"
+    volumes:
+      - ./:/var/www
+    ports:
+      - "3000:3000"
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+      - NEXT_PUBLIC_API_URL=http://localhost/api
+    depends_on:
+      - app
+    networks:
+      - sairaklin-network
+
+networks:
+  sairaklin-network:
+    driver: bridge
+
+volumes:
+  dbdata:
