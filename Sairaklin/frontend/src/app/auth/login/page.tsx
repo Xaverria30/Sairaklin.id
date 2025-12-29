@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSearchParams } from 'next/navigation'; // added
 import logo from "./logo.png";
@@ -9,7 +9,7 @@ import { Lock, User, Eye, EyeOff } from 'lucide-react';
 import Image from 'next/image';
 import { fetchApi } from '@/lib/api';
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
   // added
   const searchParams = useSearchParams();
@@ -227,5 +227,13 @@ export default function LoginPage() {
         </a>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="text-center p-5">Loading...</div>}>
+      <LoginContent />
+    </Suspense>
   );
 }

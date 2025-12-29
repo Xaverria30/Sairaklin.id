@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSearchParams } from 'next/navigation'; /* added */
 import { Form, Button, Card, InputGroup } from 'react-bootstrap';
@@ -9,7 +9,7 @@ import Image from 'next/image';
 import logo from "./logo.png";
 import { fetchApi } from '@/lib/api';
 
-export default function AdminLoginPage() {
+function AdminLoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const errorType = searchParams.get('error');
@@ -222,5 +222,13 @@ export default function AdminLoginPage() {
         </a>
       </div>
     </div>
+  );
+}
+
+export default function AdminLoginPage() {
+  return (
+    <Suspense fallback={<div className="text-center p-5">Loading...</div>}>
+      <AdminLoginContent />
+    </Suspense>
   );
 }
