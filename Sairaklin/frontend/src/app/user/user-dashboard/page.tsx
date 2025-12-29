@@ -987,22 +987,23 @@ const DashboardUser: React.FC = () => {
                       </div>
 
                       {/* textarea */}
-                      <div className="mb-3">
-                        <label className="form-label fw-semibold mb-2">Ulasan</label>
-
+                      {/* Bio */}
+                      <div className={styles.formGroup}>
+                        <label>Bio</label>
                         <textarea
-                          className={`form-control shadow-none ${styles.reviewTextarea}`}   // ✅ pakai CSS module
-                          value={reviewText}
-                          onChange={(e) => setReviewText(e.target.value.slice(0, 500))}
-                          placeholder="Contoh: Petugas ramah, hasil bersih, dan sesuai jadwal."
-                          disabled={isSubmittingReview}
-                          rows={6}
+                          value={form.bio || ""}
+                          onChange={(e) => setForm({ ...form, bio: e.target.value })}
+                          placeholder="Tulis sedikit tentang diri Anda..."
+                          rows={3}
+                          style={{
+                            width: "100%",
+                            padding: "10px 14px",
+                            borderRadius: "8px",
+                            border: "1px solid #e2e8f0",
+                            fontSize: "14px",
+                            resize: "vertical",
+                          }}
                         />
-
-                        <div className="d-flex justify-content-between mt-2">
-                          <small className="text-muted">Maksimal 500 karakter</small>
-                          <small className="text-muted">{reviewText.length}/500</small>
-                        </div>
                       </div>
 
 
