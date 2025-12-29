@@ -18,9 +18,16 @@ done
 # Run migrations
 echo "Running migrations..."
 php artisan config:clear
-# WARNING: migrate:fresh will wipe data! Use standard migrate for persistence.
-# For first time setup/dev:
-php artisan migrate:fresh --seed --force
+# Check environment
+if [ "$APP_ENV" = "production" ]; then
+    echo "Running in PRODUCTION mode."
+    echo "Running migrations (safe mode)..."
+    php artisan migrate --force
+else
+    echo "Running in DEVELOPMENT mode."
+    # WARNING: migrate:fresh will wipe data!
+    php artisan migrate:fresh --seed --force
+fi
 
 # Fix permissions
 echo "Fixing permissions..."

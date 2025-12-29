@@ -19,3 +19,13 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Security & Docker
+.env
+.env.*
+! .env.example
+docker-compose.prod.yml
+init-letsencrypt.sh
+certbot/
+npm-debug.log
+yarn-error.log
