@@ -9,6 +9,7 @@ RUN npm ci
 
 # Copy source code
 COPY . .
+RUN mkdir -p public
 
 # Build the application
 # Ensure API URL is set for build time (static generation)
