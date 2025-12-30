@@ -240,7 +240,7 @@ const DashboardUser: React.FC = () => {
 
   const handleWhatsApp = (orderId: string) => {
     const message = encodeURIComponent(`Halo, saya ingin menanyakan pesanan dengan ID: ${orderId}`);
-    window.open(`https://wa.me/6281234567890?text=${message}`, "_blank");
+    window.open(`https://wa.me/6289699021374?text=${message}`, "_blank");
   };
 
   const saveProfile = async () => {

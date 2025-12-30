@@ -101,7 +101,7 @@ const OrderDetailPage: React.FC = () => {
     const message = encodeURIComponent(
       `Halo, saya ingin menanyakan pesanan saya dengan nomor: ${order.nomorPesanan}`
     );
-    window.open(`https://wa.me/6285331987771?text=${message}`, "_blank");
+    window.open(`https://wa.me/6289699021374?text=${message}`, "_blank");
   };
 
   const handleCancel = () => {
