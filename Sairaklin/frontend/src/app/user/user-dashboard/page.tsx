@@ -73,6 +73,7 @@ const DashboardUser: React.FC = () => {
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [reviewError, setReviewError] = useState<string | null>(null);
   const [reviewSuccess, setReviewSuccess] = useState<string | null>(null);
+  const [isReadOnly, setIsReadOnly] = useState(false);
 
   const getServiceName = (type: string) => {
     if (type === "room") return "Paket Kamar";
@@ -296,6 +297,7 @@ const DashboardUser: React.FC = () => {
     setRating(order.rating ?? 0);
     setHoverRating(0); // ✅ FIX: reset hover
     setReviewText(order.review ?? "");
+    setIsReadOnly(!!order.rating); // Set read-only if rating exists
     setReviewError(null);
     setReviewSuccess(null);
     setIsReviewModalOpen(true);
@@ -1227,10 +1229,10 @@ const DashboardUser: React.FC = () => {
                             <button
                               key={v}
                               type="button"
-                              disabled={isSubmittingReview}
-                              onMouseEnter={() => setHoverRating(v)}
-                              onMouseLeave={() => setHoverRating(0)}
-                              onClick={() => setRating(v)}
+                              disabled={isSubmittingReview || isReadOnly}
+                              onMouseEnter={() => !isReadOnly && setHoverRating(v)}
+                              onMouseLeave={() => !isReadOnly && setHoverRating(0)}
+                              onClick={() => !isReadOnly && setRating(v)}
                               style={{ ...starBtnBase, ...(active ? starBtnActive : {}) }}
                               aria-label={`Beri rating ${v} bintang`}
                             >
@@ -1245,33 +1247,35 @@ const DashboardUser: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* quick chips */}
-                  <div className="mb-3">
-                    <div className="text-muted mb-2" style={{ fontSize: 12 }}>
-                      Tambah cepat (opsional)
+                  {/* quick chips (Hide if read only) */}
+                  {!isReadOnly && (
+                    <div className="mb-3">
+                      <div className="text-muted mb-2" style={{ fontSize: 12 }}>
+                        Tambah cepat (opsional)
+                      </div>
+                      <div className="d-flex gap-2 flex-wrap">
+                        {["Tepat waktu", "Ramah", "Bersih maksimal", "Rapi", "Sangat membantu"].map((chip) => (
+                          <button
+                            key={chip}
+                            type="button"
+                            className="btn btn-sm"
+                            style={chipBtn}
+                            disabled={isSubmittingReview}
+                            onClick={() => {
+                              setReviewText((prev) => {
+                                const t = (prev || "").trim();
+                                if (!t) return chip;
+                                if (t.includes(chip)) return prev;
+                                return `${t}. ${chip}`;
+                              });
+                            }}
+                          >
+                            + {chip}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                    <div className="d-flex gap-2 flex-wrap">
-                      {["Tepat waktu", "Ramah", "Bersih maksimal", "Rapi", "Sangat membantu"].map((chip) => (
-                        <button
-                          key={chip}
-                          type="button"
-                          className="btn btn-sm"
-                          style={chipBtn}
-                          disabled={isSubmittingReview}
-                          onClick={() => {
-                            setReviewText((prev) => {
-                              const t = (prev || "").trim();
-                              if (!t) return chip;
-                              if (t.includes(chip)) return prev;
-                              return `${t}. ${chip}`;
-                            });
-                          }}
-                        >
-                          + {chip}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                  )}
 
                   {/* textarea */}
                   <div className="mb-3">
@@ -1282,7 +1286,7 @@ const DashboardUser: React.FC = () => {
                       value={reviewText}
                       onChange={(e) => setReviewText(e.target.value.slice(0, 500))}
                       placeholder="Contoh: Petugas ramah, hasil bersih, dan sesuai jadwal."
-                      disabled={isSubmittingReview}
+                      disabled={isSubmittingReview || isReadOnly}
                       rows={6}
                       style={{
                         resize: "none",
@@ -1312,33 +1316,36 @@ const DashboardUser: React.FC = () => {
                     onClick={closeReviewModal}
                     disabled={isSubmittingReview}
                   >
-                    Nanti dulu
+                    {isReadOnly ? "Tutup" : "Nanti dulu"}
                   </button>
-                  <button
-                    type="button"
-                    className="btn"
-                    onClick={submitReview}
-                    disabled={isSubmittingReview || rating < 1} // ✅ UX: disable kalau belum pilih rating
-                    style={{
-                      borderRadius: 12,
-                      fontWeight: 800,
-                      color: "#fff",
-                      border: 0,
-                      background: "linear-gradient(135deg,#2563eb 0%, #1d4ed8 100%)",
-                      boxShadow: "0 14px 30px rgba(37,99,235,0.25)",
-                      padding: "10px 16px",
-                      opacity: isSubmittingReview || rating < 1 ? 0.7 : 1,
-                    }}
-                  >
-                    {isSubmittingReview ? (
-                      <>
-                        <span className="spinner-border spinner-border-sm me-2" role="status" />
-                        Mengirim...
-                      </>
-                    ) : (
-                      "Kirim Rating"
-                    )}
-                  </button>
+
+                  {!isReadOnly && (
+                    <button
+                      type="button"
+                      className="btn"
+                      onClick={submitReview}
+                      disabled={isSubmittingReview || rating < 1} // ✅ UX: disable kalau belum pilih rating
+                      style={{
+                        borderRadius: 12,
+                        fontWeight: 800,
+                        color: "#fff",
+                        border: 0,
+                        background: "linear-gradient(135deg,#2563eb 0%, #1d4ed8 100%)",
+                        boxShadow: "0 14px 30px rgba(37,99,235,0.25)",
+                        padding: "10px 16px",
+                        opacity: isSubmittingReview || rating < 1 ? 0.7 : 1,
+                      }}
+                    >
+                      {isSubmittingReview ? (
+                        <>
+                          <span className="spinner-border spinner-border-sm me-2" role="status" />
+                          Mengirim...
+                        </>
+                      ) : (
+                        "Kirim Rating"
+                      )}
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
