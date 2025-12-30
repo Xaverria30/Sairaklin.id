@@ -32,6 +32,7 @@ type AdminProfile = {
   namaLengkap: string;
   phone: string;
   email?: string;
+  bio?: string; // Added bio
 };
 
 const AdminDashboardPage: React.FC = () => {
@@ -53,6 +54,7 @@ const AdminDashboardPage: React.FC = () => {
     namaLengkap: "",
     phone: "",
     email: "",
+    bio: "",
   });
 
   const [editing, setEditing] = useState(false);
@@ -91,6 +93,7 @@ const AdminDashboardPage: React.FC = () => {
         namaLengkap: userData.name,
         phone: userData.phone || "",
         email: userData.email,
+        bio: userData.bio || "",
       };
       setProfile(newProfile);
       setForm(newProfile);
@@ -235,6 +238,7 @@ const AdminDashboardPage: React.FC = () => {
         username: form.username,
         email: form.email,
         phone: form.phone,
+        bio: form.bio, // Ensure bio is sent
       };
 
       if (newPassword) {
@@ -268,6 +272,7 @@ const AdminDashboardPage: React.FC = () => {
         username: updatedUser.user.username,
         email: updatedUser.user.email,
         phone: updatedUser.user.phone || "",
+        bio: updatedUser.user.bio || "",
       });
 
       setEditing(false);
@@ -685,6 +690,7 @@ const AdminDashboardPage: React.FC = () => {
                 <p>@{profile.username}</p>
                 <p>{profile.phone}</p>
                 {profile.email && <p>{profile.email}</p>}
+                {profile.bio && <p className="text-muted small fst-italic mt-2">{profile.bio}</p>}
 
                 <button
                   className={styles.editBtn}
@@ -732,6 +738,17 @@ const AdminDashboardPage: React.FC = () => {
                     <div className="mb-3">
                       <label className="form-label small">Email</label>
                       <input className="form-control" type="email" value={form.email || ""} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+                    </div>
+
+                    <div className="mb-3">
+                      <label className="form-label small">Bio</label>
+                      <textarea
+                        className="form-control"
+                        rows={3}
+                        placeholder="Deskripsi singkat..."
+                        value={form.bio || ""}
+                        onChange={(e) => setForm({ ...form, bio: e.target.value })}
+                      />
                     </div>
 
                     <div className="mb-3 border-top pt-3 mt-3">
