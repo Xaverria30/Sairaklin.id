@@ -49,15 +49,19 @@ const AdminDashboardPage: React.FC = () => {
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
   const [profile, setProfile] = useState<AdminProfile>({
-    username: "admin",
-    namaLengkap: "Admin Sairaklin",
-    phone: "+62 851-2345-6789",
-    email: "admin@sairaklin.id",
+    username: "",
+    namaLengkap: "",
+    phone: "",
+    email: "",
   });
 
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<AdminProfile>(profile);
   const [activeTab, setActiveTab] = useState<"dashboard" | "profile">("dashboard");
+
+  // Password states
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -72,9 +76,28 @@ const AdminDashboardPage: React.FC = () => {
   }, [router]);
 
   useEffect(() => {
-    if (!isAuthChecking) loadOrders();
+    if (!isAuthChecking) {
+      loadOrders();
+      loadProfile();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthChecking]);
+
+  const loadProfile = async () => {
+    try {
+      const userData = await fetchApi("/user");
+      const newProfile: AdminProfile = {
+        username: userData.username,
+        namaLengkap: userData.name,
+        phone: userData.phone || "",
+        email: userData.email,
+      };
+      setProfile(newProfile);
+      setForm(newProfile);
+    } catch (error) {
+      console.error("Gagal memuat profil admin", error);
+    }
+  };
 
   const loadOrders = async () => {
     setIsLoadingData(true);
@@ -205,11 +228,57 @@ const AdminDashboardPage: React.FC = () => {
     setDeleteTargetId(null);
   };
 
-  const saveProfile = () => {
-    setProfile(form);
-    setEditing(false);
-    setShowSuccessPopup(true);
-    setTimeout(() => setShowSuccessPopup(false), 2800);
+  const saveProfile = async () => {
+    try {
+      const payload: any = {
+        name: form.namaLengkap,
+        username: form.username,
+        email: form.email,
+        phone: form.phone,
+      };
+
+      if (newPassword) {
+        if (!oldPassword) {
+          alert("Masukkan password lama untuk mengganti password!");
+          return;
+        }
+
+        if (newPassword === oldPassword) {
+          alert("Password baru tidak boleh sama dengan password lama!");
+          return;
+        }
+
+        const confirmChange = window.confirm("Apakah Anda yakin ingin mengubah password?");
+        if (!confirmChange) return;
+
+        payload.current_password = oldPassword;
+        payload.new_password = newPassword;
+        payload.new_password_confirmation = newPassword;
+      }
+
+      const updatedUser = await fetchApi("/user", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      setProfile({
+        ...profile,
+        namaLengkap: updatedUser.user.name,
+        username: updatedUser.user.username,
+        email: updatedUser.user.email,
+        phone: updatedUser.user.phone || "",
+      });
+
+      setEditing(false);
+      setOldPassword("");
+      setNewPassword("");
+      setShowSuccessPopup(true);
+      setTimeout(() => setShowSuccessPopup(false), 2800);
+    } catch (error: any) {
+      console.error("Gagal menyimpan profil", error);
+      alert(error.message || "Gagal menyimpan profil");
+    }
   };
 
   const handleLogout = () => {
@@ -664,6 +733,24 @@ const AdminDashboardPage: React.FC = () => {
                       <label className="form-label small">Email</label>
                       <input className="form-control" type="email" value={form.email || ""} onChange={(e) => setForm({ ...form, email: e.target.value })} />
                     </div>
+
+                    <div className="mb-3 border-top pt-3 mt-3">
+                      <label className="form-label small fw-bold text-muted">Ganti Password (Opsional)</label>
+                      <input
+                        className="form-control mb-2"
+                        type="password"
+                        placeholder="Password Lama"
+                        value={oldPassword}
+                        onChange={(e) => setOldPassword(e.target.value)}
+                      />
+                      <input
+                        className="form-control"
+                        type="password"
+                        placeholder="Password Baru"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                      />
+                    </div>
                     <div className="d-flex gap-2">
                       <button className="btn btn-primary" onClick={saveProfile}>
                         Simpan
@@ -672,6 +759,8 @@ const AdminDashboardPage: React.FC = () => {
                         className="btn btn-outline-secondary"
                         onClick={() => {
                           setForm(profile);
+                          setOldPassword("");
+                          setNewPassword("");
                           setEditing(false);
                         }}
                       >

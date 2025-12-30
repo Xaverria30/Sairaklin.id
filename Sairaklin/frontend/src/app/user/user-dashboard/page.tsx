@@ -259,6 +259,15 @@ const DashboardUser: React.FC = () => {
           alert("Masukkan password lama untuk mengganti password!");
           return;
         }
+
+        if (newPassword === oldPassword) {
+          alert("Password baru tidak boleh sama dengan password lama!");
+          return;
+        }
+
+        const confirmChange = window.confirm("Apakah Anda yakin ingin mengubah password?");
+        if (!confirmChange) return;
+
         payload.current_password = oldPassword;
         payload.new_password = newPassword;
         payload.new_password_confirmation = newPassword;
